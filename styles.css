@@ -652,12 +652,12 @@ select.form-input, select {
   font-family: 'IBM Plex Sans', -apple-system, sans-serif !important;
   font-size: 28px;
   font-weight: 600;
-  color: #f8fafc !important;
+  color: var(--text);
   font-variant-numeric: tabular-nums lining-nums !important;
   letter-spacing: -0.02em !important;
 }
 
-/* Figure & Amount Typography & Color Normalization (Dark Mode Default) */
+/* Figure & Amount Typography & Color Normalization (Dark Mode Default: var(--text)) */
 .amount, 
 .stat-value, 
 .figure, 
@@ -668,6 +668,7 @@ select.form-input, select {
 .safe-spend-amount,
 .net-worth-value,
 .net-worth-figure,
+.net-worth-sub,
 .daily-limit-figure,
 .remaining-budget-figure,
 .inc-amount, 
@@ -679,6 +680,7 @@ select.form-input, select {
 .exp-amt,
 .recent-amt,
 .inv-val,
+.static-target-value,
 #netWorthValue,
 #netWorthSecondary,
 #liquidCash,
@@ -696,6 +698,9 @@ select.form-input, select {
 #remaining-spend,
 #bankCashVal,
 #momoCashVal,
+#mtnMomoCashVal,
+#telecelCashVal,
+#atMoneyCashVal,
 #homeCashVal,
 #usdHomeCashVal,
 #usdHomeCashGhsVal,
@@ -718,8 +723,8 @@ select.form-input, select {
   font-family: 'IBM Plex Sans', -apple-system, sans-serif !important;
   font-variant-numeric: tabular-nums lining-nums !important;
   letter-spacing: -0.02em !important;
-  color: #f8fafc !important;
-  -webkit-text-fill-color: #f8fafc !important;
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
 }
 
 /* Light Mode Overrides: Ensure ALL numerical figures appear crisp solid black (#15161c) */
@@ -731,28 +736,71 @@ select.form-input, select {
 [data-theme="light"] .account-vault-balance, 
 [data-theme="light"] .month-val,
 [data-theme="light"] .net-worth-value,
+[data-theme="light"] .net-worth-figure,
+[data-theme="light"] .net-worth-sub,
 [data-theme="light"] .safe-spend-amount,
-[data-theme="light"] #safeDailyAllowance,
-[data-theme="light"] #activeSpendRemaining,
-[data-theme="light"] #activeSpendTarget,
-[data-theme="light"] #cycleIncomeVal,
-[data-theme="light"] #netCashFlowVal,
-[data-theme="light"] #safe-spend-limit,
 [data-theme="light"] .daily-limit-figure,
-[data-theme="light"] #remaining-spend,
 [data-theme="light"] .remaining-budget-figure,
-[data-theme="light"] .inc-amount, 
-[data-theme="light"] .income-val,
 [data-theme="light"] .progress-amount,
 [data-theme="light"] .dc-value,
 [data-theme="light"] .legend-value,
 [data-theme="light"] .recent-amt,
-[data-theme="light"] .metric-value {
+[data-theme="light"] .metric-value,
+[data-theme="light"] .exp-amt,
+[data-theme="light"] .inv-val,
+[data-theme="light"] .static-target-value,
+[data-theme="light"] #netWorthValue,
+[data-theme="light"] #netWorthSecondary,
+[data-theme="light"] #liquidCash,
+[data-theme="light"] #lockedInv,
+[data-theme="light"] #salaryDisplay,
+[data-theme="light"] #total-net-worth,
+[data-theme="light"] #safeDailyAllowance,
+[data-theme="light"] #todaySpentBadge,
+[data-theme="light"] #activeSpendRemaining,
+[data-theme="light"] #activeSpendTarget,
+[data-theme="light"] #safe-spend-limit,
+[data-theme="light"] #remaining-spend,
+[data-theme="light"] #spending-target,
+[data-theme="light"] #spent-so-far,
+[data-theme="light"] #bankCashVal,
+[data-theme="light"] #momoCashVal,
+[data-theme="light"] #mtnMomoCashVal,
+[data-theme="light"] #telecelCashVal,
+[data-theme="light"] #atMoneyCashVal,
+[data-theme="light"] #homeCashVal,
+[data-theme="light"] #usdHomeCashVal,
+[data-theme="light"] #usdHomeCashGhsVal,
+[data-theme="light"] #spentAmount,
+[data-theme="light"] #spendLimit,
+[data-theme="light"] #progressPct,
+[data-theme="light"] #daysLeft,
+[data-theme="light"] #reportYearTotal,
+[data-theme="light"] #reportMonthlyAvg,
+[data-theme="light"] #reportHighestMonth,
+[data-theme="light"] #tbillTotal,
+[data-theme="light"] #gcbTotal,
+[data-theme="light"] #stockTotal,
+[data-theme="light"] #totalReceivablesBadge,
+[data-theme="light"] #totalPayablesBadge {
   color: #15161c !important;
   -webkit-text-fill-color: #15161c !important;
   background: none !important;
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
+}
+
+/* Light Mode Specific Accents for Income & Savings Rate */
+[data-theme="light"] .inc-amount, 
+[data-theme="light"] .income-val,
+[data-theme="light"] #cycleIncomeVal {
+  color: #10b981 !important;
+  -webkit-text-fill-color: #10b981 !important;
+}
+
+[data-theme="light"] #savingsRatePct {
+  color: #d97706 !important;
+  -webkit-text-fill-color: #d97706 !important;
 }
 
 /* Tracker Glass Badges (Mica Frosted Glass, soft 8px corners) */
