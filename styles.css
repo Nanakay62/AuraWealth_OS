@@ -8,11 +8,11 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0f1117;
-  --bg-elev: #16181f;
-  --glass: rgba(255, 255, 255, 0.04);
-  --glass-h: rgba(255, 255, 255, 0.07);
-  --border-subtle: rgba(255, 255, 255, 0.03);
+  --bg: #090c10;
+  --bg-elev: #131822;
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-h: rgba(255, 255, 255, 0.05);
+  --border-subtle: rgba(255, 255, 255, 0.08);
   --text: #f5f5f7;
   --text-m: rgba(245, 245, 247, 0.58);
   --text-d: rgba(245, 245, 247, 0.32);
@@ -27,24 +27,24 @@
   --orange: #fb923c;
   --blue: #60a5fa;
   --purple: #a78bfa;
-  --sh-l: 0 20px 48px rgba(0, 0, 0, 0.45);
-  --sh-m: 0 10px 30px rgba(0, 0, 0, 0.28);
-  --sh-s: 0 4px 16px rgba(0, 0, 0, 0.18);
+  --sh-l: inset 0 1px 0 0 rgba(255, 255, 255, 0.14), 0 12px 32px rgba(0, 0, 0, 0.5);
+  --sh-m: inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 8px 24px rgba(0, 0, 0, 0.4);
+  --sh-s: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 4px 12px rgba(0, 0, 0, 0.3);
   --r-l: 24px;
   --r-m: 16px;
   --r-s: 10px;
   --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --toast-bg: rgba(22, 24, 31, 0.95);
+  --toast-bg: rgba(19, 24, 34, 0.95);
   --toast-text: #f5f5f7;
   --input-bg: rgba(0, 0, 0, 0.28);
   --input-bg-focus: rgba(0, 0, 0, 0.4);
   --track-bg: rgba(0, 0, 0, 0.28);
   --donut-track: rgba(0, 0, 0, 0.35);
-  --app-window-bg: rgba(15, 17, 23, 0.55);
+  --app-window-bg: #090c10;
   --sidebar-bg: rgba(0, 0, 0, 0.12);
   --target-info-bg: rgba(0, 0, 0, 0.22);
-  --mica-surface: rgba(15, 20, 28, 0.85);
+  --mica-surface: #131822;
   --mica-card-bg: rgba(255, 255, 255, 0.03);
   --mica-border: 1px solid rgba(255, 255, 255, 0.08);
   --mica-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
@@ -52,27 +52,27 @@
 }
 
 [data-theme="light"] {
-  --bg: #eef0f5;
+  --bg: #f2f2f2;
   --bg-elev: #ffffff;
-  --glass: rgba(255, 255, 255, 0.65);
-  --glass-h: rgba(255, 255, 255, 0.85);
-  --border-subtle: rgba(20, 22, 34, 0.03);
+  --glass: #ffffff;
+  --glass-h: #ffffff;
+  --border-subtle: rgba(0, 0, 0, 0.05);
   --text: #15161c;
   --text-m: rgba(21, 22, 28, 0.62);
   --text-d: rgba(21, 22, 28, 0.38);
   --gold-g: rgba(245, 158, 11, 0.18);
-  --sh-l: 0 20px 48px rgba(30, 34, 60, 0.12);
-  --sh-m: 0 10px 30px rgba(30, 34, 60, 0.08);
-  --sh-s: 0 4px 16px rgba(30, 34, 60, 0.06);
-  --toast-bg: rgba(255, 255, 255, 0.92);
+  --sh-l: 0 8px 20px rgba(0, 0, 0, 0.09);
+  --sh-m: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sh-s: 0 2px 6px rgba(0, 0, 0, 0.04);
+  --toast-bg: #ffffff;
   --toast-text: #15161c;
-  --input-bg: rgba(20, 22, 34, 0.045);
-  --input-bg-focus: rgba(20, 22, 34, 0.07);
-  --track-bg: rgba(20, 22, 34, 0.06);
-  --donut-track: rgba(238, 240, 245, 1);
-  --app-window-bg: rgba(255, 255, 255, 0.65);
-  --sidebar-bg: rgba(20, 22, 34, 0.02);
-  --target-info-bg: rgba(20, 22, 34, 0.04);
+  --input-bg: rgba(0, 0, 0, 0.035);
+  --input-bg-focus: rgba(0, 0, 0, 0.06);
+  --track-bg: rgba(0, 0, 0, 0.05);
+  --donut-track: rgba(242, 242, 242, 1);
+  --app-window-bg: #f2f2f2;
+  --sidebar-bg: rgba(0, 0, 0, 0.02);
+  --target-info-bg: rgba(0, 0, 0, 0.04);
   color-scheme: light;
 }
 
@@ -373,7 +373,7 @@ button, input, select { font: inherit; }
 .form-input:focus { outline: none; box-shadow: 0 0 0 3px var(--gold-g); background: var(--input-bg-focus); }
 .form-input::placeholder { color: var(--text-d); }
 
-/* Select Dropdown Fix — Non-repeating single SVG arrow */
+/* Select Dropdown Fix - Non-repeating single SVG arrow */
 select.form-input, select {
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
@@ -801,6 +801,97 @@ select.form-input, select {
 [data-theme="light"] #savingsRatePct {
   color: #d97706 !important;
   -webkit-text-fill-color: #d97706 !important;
+}
+
+/* Microsoft Fluent Light Mode Surface Texture & Card Overrides */
+[data-theme="light"] .card,
+[data-theme="light"] .mica-card,
+[data-theme="light"] .stat-card,
+[data-theme="light"] .inv-card,
+[data-theme="light"] .asset-card,
+[data-theme="light"] .net-worth-card,
+[data-theme="light"] .safe-spend-card,
+[data-theme="light"] .progress-card,
+[data-theme="light"] .card-income,
+[data-theme="light"] .card-tbill,
+[data-theme="light"] .card-gcb,
+[data-theme="light"] .card-stocks {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .card:hover,
+[data-theme="light"] .mica-card:hover,
+[data-theme="light"] .stat-card:hover,
+[data-theme="light"] .inv-card:hover,
+[data-theme="light"] .asset-card:hover,
+[data-theme="light"] .net-worth-card:hover,
+[data-theme="light"] .safe-spend-card:hover,
+[data-theme="light"] .progress-card:hover,
+[data-theme="light"] .card-income:hover,
+[data-theme="light"] .card-tbill:hover,
+[data-theme="light"] .card-gcb:hover,
+[data-theme="light"] .card-stocks:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.09) !important;
+}
+
+/* Premium Microsoft Fluent Dark Mode Surface Texture & Card Overrides */
+[data-theme="dark"] .card,
+[data-theme="dark"] .mica-card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .inv-card,
+[data-theme="dark"] .asset-card,
+[data-theme="dark"] .net-worth-card,
+[data-theme="dark"] .safe-spend-card,
+[data-theme="dark"] .progress-card,
+[data-theme="dark"] .card-income,
+[data-theme="dark"] .card-tbill,
+[data-theme="dark"] .card-gcb,
+[data-theme="dark"] .card-stocks,
+:root:not([data-theme="light"]) .card,
+:root:not([data-theme="light"]) .mica-card,
+:root:not([data-theme="light"]) .stat-card,
+:root:not([data-theme="light"]) .inv-card,
+:root:not([data-theme="light"]) .asset-card,
+:root:not([data-theme="light"]) .net-worth-card,
+:root:not([data-theme="light"]) .safe-spend-card,
+:root:not([data-theme="light"]) .progress-card,
+:root:not([data-theme="light"]) .card-income,
+:root:not([data-theme="light"]) .card-tbill,
+:root:not([data-theme="light"]) .card-gcb,
+:root:not([data-theme="light"]) .card-stocks {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .card:hover,
+[data-theme="dark"] .mica-card:hover,
+[data-theme="dark"] .stat-card:hover,
+[data-theme="dark"] .inv-card:hover,
+[data-theme="dark"] .asset-card:hover,
+[data-theme="dark"] .net-worth-card:hover,
+[data-theme="dark"] .safe-spend-card:hover,
+[data-theme="dark"] .progress-card:hover,
+[data-theme="dark"] .card-income:hover,
+[data-theme="dark"] .card-tbill:hover,
+[data-theme="dark"] .card-gcb:hover,
+[data-theme="dark"] .card-stocks:hover,
+:root:not([data-theme="light"]) .card:hover,
+:root:not([data-theme="light"]) .mica-card:hover,
+:root:not([data-theme="light"]) .stat-card:hover,
+:root:not([data-theme="light"]) .inv-card:hover,
+:root:not([data-theme="light"]) .asset-card:hover,
+:root:not([data-theme="light"]) .net-worth-card:hover,
+:root:not([data-theme="light"]) .safe-spend-card:hover,
+:root:not([data-theme="light"]) .progress-card:hover,
+:root:not([data-theme="light"]) .card-income:hover,
+:root:not([data-theme="light"]) .card-tbill:hover,
+:root:not([data-theme="light"]) .card-gcb:hover,
+:root:not([data-theme="light"]) .card-stocks:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
 }
 
 /* Tracker Glass Badges (Mica Frosted Glass, soft 8px corners) */
