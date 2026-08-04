@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Aura">
+  <title>Aura — Powered by DycsonEconsOS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Sans:wght@400;500;600;700&family=Manrope:wght@300..800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Sticky Guest Mode Header Banner -->
+  <div class="guest-banner" id="guestBanner">
+    <span>Working locally. Sign in to back up and access your private data across devices.</span>
+    <button class="btn btn-primary" onclick="openAuthModal()" style="font-size:11px; padding:6px 12px; border-radius:8px;">Sign In / Sign Up</button>
+  </div>
+
+  <!-- Animated Ambient Orbs -->
+  <div class="bg-canvas">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="app-window">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">A</div>
+        <div>
+          <div class="brand-name">Aura</div>
+          <div class="brand-sub">ECONOMICS OS</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="dashboard"><span>Dashboard</span></button>
+        <button class="nav-item" data-view="accounts"><span>Accounts / Vaults</span></button>
+        <button class="nav-item" data-view="investments"><span>Portfolio</span></button>
+        <button class="nav-item" data-view="expenses"><span>Transactions</span></button>
+        <button class="nav-item" data-view="debts"><span>Debts & Receivables</span></button>
+        <button class="nav-item" data-view="reports"><span>Reports & Summaries</span></button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-item" data-view="settings"><span>Settings</span></button>
+        <button class="btn btn-ghost pwa-install-btn" onclick="triggerPwaInstall()" style="font-size:11px; padding:6px 12px; margin-top:6px; width:100%; display:none;">📱 Install App</button>
+        <div class="user-card" id="userCard" title="Manage Account & Sync">
+          <div class="user-avatar" id="userAvatar">G</div>
+          <div>
+            <div class="user-name" id="userName">Guest</div>
+            <div class="user-status" id="userStatus">Personal (Local)</div>
+          </div>
+        </div>
+        <div style="font-size: 10px; color: var(--text-d); margin-top: 14px; text-align: center; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.5;">
+          <div>Aura v2.0 • Powered by DycsonEconsOS</div>
+          <div style="margin-top: 2px;">Made by Nana Kwame Dickson</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Canvas -->
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="greeting" id="greeting">Good morning, Guest</div>
+          <div class="date-text" id="currentDate"></div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="btn btn-ghost" id="transferTopBtn" onclick="openTransferModal()" style="font-size:12px; padding:8px 12px; color:var(--gold);">+ Transfer</button>
+          <button class="btn btn-emerald" id="addIncomeTopBtn" style="font-size:12px; padding:8px 14px;">+ Add Income</button>
+          <button class="btn btn-ghost" id="currencyToggleBtn" title="Toggle GH₵ / USD Display" style="font-size:12px; padding:8px 12px;">GH₵</button>
+          <button class="icon-btn" id="themeToggleBtn" title="Toggle light / dark"></button>
+          <button class="icon-btn" id="nav-help-btn" title="Quick Help & Guide">?</button>
+          <button class="icon-btn" id="quickAddBtn" title="Quick add expense"></button>
+        </div>
+      </header>
+
+      <div class="views-container">
+        <!-- ===== Dashboard View ===== -->
+        <section class="view active" id="view-dashboard">
+          <div class="dash-grid">
+            
+            <!-- Card 1 (Top): Net Worth Card with Liquid vs Total Pill Switch -->
+            <div class="net-worth-card">
+              <div class="nw-content">
+                <div class="nw-header-row">
+                  <div class="card-label" id="nwCardLabel">Total Net Worth</div>
+                  <div class="nw-pill-toggle">
+                    <button class="nw-pill-opt active" id="nwModeTotal" onclick="setNwMode('total')">Total Worth</button>
+                    <button class="nw-pill-opt" id="nwModeLiquid" onclick="setNwMode('liquid')">Liquid Cash</button>
+                  </div>
+                </div>
+                <div class="net-worth-value" id="netWorthValue">GH₵0.00</div>
+                <div class="net-worth-sub" id="netWorthSecondary">USD $0.00</div>
+                
+                <div class="nw-breakdown">
+                  <div class="bd-item">
+                    <div class="bd-label"><div class="bd-dot" style="background:var(--gold);color:var(--gold)"></div>Liquid Cash</div>
+                    <div class="bd-value" id="liquidCash">GH₵0.00</div>
+                  </div>
+                  <div class="bd-item">
+                    <div class="bd-label"><div class="bd-dot" style="background:var(--indigo);color:var(--indigo)"></div>Locked Investments</div>
+                    <div class="bd-value" id="lockedInv">GH₵0.00</div>
+                  </div>
+                  <div class="bd-item">
+                    <div class="bd-label"><div class="bd-dot" style="background:var(--emerald);color:var(--emerald)"></div>Payday Cycle Income</div>
+                    <div class="bd-value" id="salaryDisplay">GH₵0.00</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2 (Immediate Below): Active Spending Tracker ("Money to Spend") -->
+            <div class="card active-spending-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(52,211,153,0.06));">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                <div class="card-label">Active Spending Tracker ("Money to Spend")</div>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                  <div id="paydayCountdownBadge" class="tracker-glass-badge" title="Cycle resets automatically on the 25th">🗓️ Cycle</div>
+                  <div id="activeSpendBadge" class="tracker-glass-badge">100% Available</div>
+                </div>
+              </div>
+              <div class="cashflow-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap:16px;">
+                <div>
+                  <div class="metric-label">Spending Target / Budget</div>
+                  <div style="font-size:22px; font-weight:600; color:var(--text);" id="activeSpendTarget">GH₵0.00</div>
+                </div>
+                <div>
+                  <div class="metric-label">Spent So Far</div>
+                  <div style="font-size:22px; font-weight:600; color:var(--rose);" id="activeSpendSpent">- GH₵0.00</div>
+                </div>
+                <div>
+                  <div class="metric-label">Remaining Available to Spend</div>
+                  <div style="font-size:24px; font-weight:700; color:var(--text);" id="activeSpendRemaining">GH₵0.00</div>
+                </div>
+              </div>
+              <div class="progress-bar" style="margin-top:14px;">
+                <div class="progress-fill" id="activeSpendGaugeFill" style="width:0%; background:linear-gradient(90deg, #34d399, #fbbf24);"></div>
+              </div>
+            </div>
+
+            <!-- Card 2b: Safe Daily Spendable Limit Card with Dual-Limit Pacing -->
+            <div class="card safe-spend-card" style="grid-column: 1 / -1;">
+              <div class="safe-spend-header">
+                <div>
+                  <div class="card-label">Dynamic Safe-to-Spend Daily Limit</div>
+                  <div class="safe-spend-amount" id="safeDailyAllowance">GH₵0.00 / day</div>
+                  <div id="safe-spend-limit" style="display:none;"></div>
+                </div>
+                <div style="text-align:right;">
+                  <div class="card-label">Spent Today</div>
+                  <div style="font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;" id="todaySpentBadge">GH₵0.00</div>
+                  <div id="pacing-status-badge" class="pacing-badge on-track" style="margin-top:6px;">ON TRACK</div>
+                </div>
+              </div>
+
+              <!-- Frosted Mica Glass Sub-Box for Static Baseline Target -->
+              <div class="baseline-anchor-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.06em; font-weight:700; color:var(--text-m);">Static Baseline Target:</span>
+                    <span class="static-target-value" id="staticDailyTarget" style="font-weight:700; font-size:14px; font-variant-numeric:tabular-nums;">GH₵0.00 / day</span>
+                    <span id="static-daily-target" style="display:none;"></span>
+                  </div>
+                  <span id="safeAllowanceStatus" style="font-weight:600; font-size:12px; color:var(--emerald);">On Track</span>
+                </div>
+                <div class="baseline-subtext" id="baselineAnchorSubtext" style="font-size:12px; color:var(--text-m); margin-top:4px;">
+                  Target: GH₵0.00/day across 30 days to hit GH₵0.00 budget.
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Liquid Assets Location Breakdown Card with Emergency Runway Badge -->
+            <div class="card liquid-breakdown-card" style="grid-column: 1 / -1; background: rgba(255,255,255,0.03);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                <div class="card-label">Liquid Cash Assets Breakdown</div>
+                <div id="emergencyRunwayBadge" class="runway-badge emerald">Runway: 0.0 Months Covered</div>
+              </div>
+              <div class="liquid-breakdown-grid liquid-cash-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
+                <div class="bd-item">
+                  <div class="bd-label"><div class="bd-dot" style="background:var(--blue);color:var(--blue)"></div>Bank Account (Savings)</div>
+                  <div class="bd-value" id="bankCashVal">GH₵0.00</div>
+                </div>
+                <div class="bd-item">
+                  <div class="bd-label"><div class="bd-dot" style="background:var(--gold);color:var(--gold)"></div>MTN Mobile Money</div>
+                  <div class="bd-value" id="mtnMomoCashVal">GH₵0.00</div>
+                </div>
+                <div class="bd-item">
+                  <div class="bd-label"><div class="bd-dot" style="background:var(--rose);color:var(--rose)"></div>Telecel Cash Wallet</div>
+                  <div class="bd-value" id="telecelCashVal">GH₵0.00</div>
+                </div>
+                <div class="bd-item">
+                  <div class="bd-label"><div class="bd-dot" style="background:#0284c7;color:#0284c7"></div>AT Money (AirtelTigo)</div>
+                  <div class="bd-value" id="atMoneyCashVal">GH₵0.00</div>
+                </div>
+                <div class="bd-item">
+                  <div class="bd-label"><div class="bd-dot" style="background:var(--gold);color:var(--gold)"></div>Physical Home Cash</div>
+                  <div class="bd-value" id="homeCashVal">GH₵0.00</div>
+                </div>
+                <div class="bd-item">
+                  <div class="bd-label"><div class="bd-dot" style="background:var(--emerald);color:var(--emerald)"></div>USD Home Cash ($)</div>
+                  <div class="bd-value" id="usdHomeCashVal">$0.00</div>
+                  <div style="font-size:11px; color:var(--text-m);" id="usdHomeCashGhsVal">(GH₵0.00)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Net Cash Flow & Savings Rate Summary Card -->
+            <div class="card card-income" style="grid-column: 1 / -1;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                <div class="card-label">Payday Cycle Cash Flow & Savings Engine</div>
+                <div style="padding:4px 12px; border-radius:12px; background:rgba(52,211,153,0.15); color:var(--emerald); font-weight:800; font-size:12px;" id="savingsRateBadge">Savings Rate: 0%</div>
+              </div>
+              <div class="cashflow-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:16px;">
+                <div>
+                  <div class="metric-label">Cycle Income</div>
+                  <div style="font-size:22px; font-weight:600; color:var(--emerald);" id="cycleIncomeVal">GH₵0.00</div>
+                </div>
+                <div>
+                  <div class="metric-label">Cycle Expenses</div>
+                  <div style="font-size:22px; font-weight:600; color:var(--rose);" id="cycleExpVal">GH₵0.00</div>
+                </div>
+                <div>
+                  <div class="metric-label">Net Cash Flow</div>
+                  <div style="font-size:22px; font-weight:600;" id="netCashFlowVal">GH₵0.00</div>
+                </div>
+                <div>
+                  <div class="metric-label">Cycle Savings Rate</div>
+                  <div style="font-size:22px; font-weight:600; color:var(--gold);" id="savingsRatePct">0.0%</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Monthly Spending Progress Card & Payday Cycle -->
+            <div class="card progress-card">
+              <div class="progress-header">
+                <div>
+                  <div class="card-label" id="paydayCycleLabel">Spending Progress (Payday Cycle)</div>
+                  <div class="progress-amount" id="spentAmount">GH₵0.00</div>
+                </div>
+                <div style="text-align:right;">
+                  <div class="card-label">Cycle Budget</div>
+                  <div style="font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;" id="spendLimit">GH₵0.00</div>
+                </div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="spendProgress" style="width:0%;background:linear-gradient(90deg,#34d399,#10b981);"></div>
+              </div>
+              <div class="progress-meta">
+                <span id="progressPct">0% used</span>
+                <span id="daysLeft">— days left until payday</span>
+              </div>
+              <div class="mini-chart" id="miniChart"></div>
+            </div>
+
+            <!-- Ambient Asset Cards -->
+            <div class="asset-cards">
+              <div class="card asset-card tbill card-tbill">
+                <div class="asset-name">Treasury Bills</div>
+                <div class="asset-value" id="tbillTotal">GH₵0.00</div>
+                <div class="asset-meta"><span id="tbillCount">0 positions</span></div>
+              </div>
+              <div class="card asset-card gcb card-gcb">
+                <div class="asset-name">GCB Master Wealth</div>
+                <div class="asset-value" id="gcbTotal">GH₵0.00</div>
+                <div class="asset-meta"><span id="gcbCount">0 positions</span></div>
+              </div>
+              <div class="card asset-card stock card-stocks">
+                <div class="asset-name">Stocks</div>
+                <div class="asset-value" id="stockTotal">GH₵0.00</div>
+                <div class="asset-meta"><span id="stockCount">0 holdings</span></div>
+              </div>
+            </div>
+
+            <!-- Asset Donut Allocation & Recent Expenses -->
+            <div class="alloc-section">
+              <div class="card donut-card">
+                <div class="donut-wrap">
+                  <div class="donut" id="allocDonut"></div>
+                  <div class="donut-center" id="donutCenter"></div>
+                </div>
+                <div class="legend" id="allocLegend"></div>
+              </div>
+              <div class="card">
+                <div class="card-label" style="margin-bottom:14px;">Recent Expenses</div>
+                <div class="recent-list" id="recentList"></div>
+              </div>
+            </div>
+
+            <!-- Reminders & Notifications -->
+            <div class="card" style="grid-column:1/-1;">
+              <div class="card-label" style="margin-bottom:14px;">Maturity & Target Trigger Badges</div>
+              <div class="reminder-list" id="reminderList"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Expenses & Income View ===== -->
+        <section class="view" id="view-expenses">
+          <div class="card exp-form-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <div class="card-label">Log Transaction</div>
+              <button class="btn btn-emerald" onclick="openIncomeModal()" style="font-size:12px; padding:6px 14px;">+ Log Income</button>
+            </div>
+            <div class="cat-pills" id="catPills">
+              <button class="cat-pill active" data-cat="food">Food</button>
+              <button class="cat-pill" data-cat="transport">Transport</button>
+              <button class="cat-pill" data-cat="bills">Bills</button>
+              <button class="cat-pill" data-cat="shopping">Shopping</button>
+              <button class="cat-pill" data-cat="data_airtime">Data & Airtime</button>
+              <button class="cat-pill" data-cat="misc">Misc</button>
+            </div>
+            
+            <!-- One-Tap Quick Log Presets -->
+            <div style="margin-bottom:16px;">
+              <div class="form-label" style="margin-bottom:6px;">One-Tap Quick Expense Presets:</div>
+              <div class="quick-preset-row">
+                <button class="quick-preset-btn" onclick="quickLogExpense(10, 'transport', 'Tro-tro / Bus')">+ GH₵10 Transport</button>
+                <button class="quick-preset-btn" onclick="quickLogExpense(25, 'food', 'Lunch')">+ GH₵25 Lunch</button>
+                <button class="quick-preset-btn" onclick="quickLogExpense(50, 'shopping', 'Groceries')">+ GH₵50 Groceries</button>
+                <button class="quick-preset-btn" onclick="quickLogExpense(15, 'data_airtime', 'Data / Airtime')">+ GH₵15 Data & Airtime</button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Expense Amount (GH₵)</label>
+                <input type="number" class="form-input" id="expAmount" placeholder="0.00" step="0.01" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Payment Source</label>
+                <select class="form-input" id="expSource">
+                  <option value="bank_cash">Bank Account (Savings)</option>
+                  <option value="mtn_momo_cash" selected>MTN Mobile Money</option>
+                  <option value="telecel_cash">Telecel Cash</option>
+                  <option value="at_money_cash">AT Money (AirtelTigo)</option>
+                  <option value="home_cash">Physical Home Cash</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Date</label>
+                <input type="date" class="form-input" id="expDate">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label class="form-label">Notes (optional)</label>
+              <input type="text" class="form-input" id="expNotes" placeholder="What was this for?">
+            </div>
+            <button class="btn btn-primary" id="addExpBtn">Add Expense</button>
+          </div>
+
+          <div class="stats-row">
+            <div class="card stat-card">
+              <div class="stat-label">Today's Spent</div>
+              <div class="stat-value" id="todayTotal">GH₵0.00</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-label">This Week</div>
+              <div class="stat-value" id="weekTotal">GH₵0.00</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-label">Cycle Income</div>
+              <div class="stat-value" id="cycleIncomeTotal" style="color:var(--emerald);">GH₵0.00</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-label">Cycle Expenses</div>
+              <div class="stat-value" id="monthTotal">GH₵0.00</div>
+            </div>
+          </div>
+
+          <!-- Tabbed History (Expenses vs Income vs Transfers) -->
+          <div class="card">
+            <div class="tabs-row">
+              <div class="tabs">
+                <button class="tab active" id="historyTabExp" onclick="switchHistoryTab('expenses')">Expense History</button>
+                <button class="tab" id="historyTabInc" onclick="switchHistoryTab('income')">Income History</button>
+                <button class="tab" id="historyTabTrf" onclick="switchHistoryTab('transfers')">Transfers Log</button>
+              </div>
+            </div>
+            <div id="historyExpView">
+              <div class="exp-list" id="expList"></div>
+            </div>
+            <div id="historyIncView" style="display:none;">
+              <div class="exp-list" id="incList"></div>
+            </div>
+            <div id="historyTrfView" style="display:none;">
+              <div class="exp-list" id="trfList"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Accounts / Vaults View ===== -->
+        <section class="view" id="view-accounts">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div class="card-label">Asset Accounts & Liquidity Vaults</div>
+              <div style="font-size:20px; font-weight:700; color:var(--text); margin-top:2px;">Liquid Cash Vaults</div>
+            </div>
+            <button class="btn btn-emerald" onclick="openTransferModal()" style="font-size:12px; padding:8px 16px;">+ Transfer Money</button>
+          </div>
+
+          <!-- Quick Bank -> MoMo Transfer Widget -->
+          <div class="card" style="background: linear-gradient(135deg, rgba(96,165,250,0.1), rgba(244,114,182,0.1)); margin-bottom: 20px;">
+            <div class="card-label" style="margin-bottom: 12px; color:var(--gold);">Quick Internal Transfer (Bank ➔ MoMo)</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+              <div style="font-size:14px; font-weight:600;">
+                <span style="color:var(--blue)">Bank: <strong id="quickTransferBankVal">GH₵0.00</strong></span>
+                <span style="margin:0 10px; color:var(--text-d)">➔</span>
+                <span style="color:var(--pink)">MoMo: <strong id="quickTransferMomoVal">GH₵0.00</strong></span>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <input type="number" class="form-input" id="quickTransferAmt" placeholder="Amount (GH₵)" style="width:140px; padding:6px 12px; font-size:13px;">
+                <button class="btn btn-emerald" onclick="executeQuickBankToMomo()" style="font-size:12px; padding:8px 14px;">Transfer to MoMo Now</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Vault Cards Grid -->
+          <div class="accounts-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:18px; margin-bottom:20px;">
+            <div class="account-vault-card" id="accountCardBank">
+              <div class="account-vault-header">
+                <div class="account-vault-title"><div class="bd-dot" style="background:var(--blue);color:var(--blue)"></div>Bank Account (Savings)</div>
+                <button class="btn btn-ghost" onclick="openEditBalanceModal('bank')" style="font-size:11px; padding:4px 8px;">Edit Balance</button>
+              </div>
+              <div class="account-vault-balance" id="vaultBankVal">GH₵0.00</div>
+              <div style="font-size:12px; color:var(--text-d);">Primary Salary Credit Account</div>
+            </div>
+
+            <div class="account-vault-card" id="accountCardMtnMomo">
+              <div class="account-vault-header">
+                <div class="account-vault-title"><div class="bd-dot" style="background:var(--gold);color:var(--gold)"></div>MTN Mobile Money</div>
+                <button class="btn btn-ghost" onclick="openEditBalanceModal('mtn_momo')" style="font-size:11px; padding:4px 8px;">Edit Balance</button>
+              </div>
+              <div class="account-vault-balance" id="vaultMtnMomoVal">GH₵0.00</div>
+              <div style="font-size:12px; color:var(--text-d);">Primary MoMo Wallet</div>
+            </div>
+
+            <div class="account-vault-card" id="accountCardTelecel">
+              <div class="account-vault-header">
+                <div class="account-vault-title"><div class="bd-dot" style="background:var(--rose);color:var(--rose)"></div>Telecel Cash</div>
+                <button class="btn btn-ghost" onclick="openEditBalanceModal('telecel_cash')" style="font-size:11px; padding:4px 8px;">Edit Balance</button>
+              </div>
+              <div class="account-vault-balance" id="vaultTelecelCashVal">GH₵0.00</div>
+              <div style="font-size:12px; color:var(--text-d);">Secondary Mobile Wallet</div>
+            </div>
+
+            <div class="account-vault-card" id="accountCardAtMoney">
+              <div class="account-vault-header">
+                <div class="account-vault-title"><div class="bd-dot" style="background:#0284c7;color:#0284c7"></div>AT Money</div>
+                <button class="btn btn-ghost" onclick="openEditBalanceModal('at_money_cash')" style="font-size:11px; padding:4px 8px;">Edit Balance</button>
+              </div>
+              <div class="account-vault-balance" id="vaultAtMoneyVal">GH₵0.00</div>
+              <div style="font-size:12px; color:var(--text-d);">AirtelTigo Money</div>
+            </div>
+
+            <div class="account-vault-card" id="accountCardHome">
+              <div class="account-vault-header">
+                <div class="account-vault-title"><div class="bd-dot" style="background:var(--gold);color:var(--gold)"></div>Physical Home Cash</div>
+                <button class="btn btn-ghost" onclick="openEditBalanceModal('home_cash')" style="font-size:11px; padding:4px 8px;">Edit Balance</button>
+              </div>
+              <div class="account-vault-balance" id="vaultHomeVal">GH₵0.00</div>
+              <div style="font-size:12px; color:var(--text-d);">Drawer / Bedside Cash</div>
+            </div>
+
+            <div class="account-vault-card" id="accountCardUsd">
+              <div class="account-vault-header">
+                <div class="account-vault-title"><div class="bd-dot" style="background:var(--emerald);color:var(--emerald)"></div>USD Home Cash ($)</div>
+                <button class="btn btn-ghost" onclick="openEditBalanceModal('usd_home_cash')" style="font-size:11px; padding:4px 8px;">Edit Balance</button>
+              </div>
+              <div>
+                <div class="account-vault-balance" id="vaultUsdVal">$0.00</div>
+                <div style="font-size:13px; color:var(--emerald); font-weight:600;" id="vaultUsdGhsVal">(GH₵0.00)</div>
+              </div>
+              <div style="font-size:12px; color:var(--text-d);">Hard Currency Savings Reserve</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Investments View ===== -->
+        <section class="view" id="view-investments">
+          <div class="tabs-row">
+            <div class="tabs">
+              <button class="tab active" data-tab="fixed">Fixed Income</button>
+              <button class="tab" data-tab="stocks">Stocks</button>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-ghost" id="syncGseBtn" style="font-size:13px;">Sync GSE Stock Prices</button>
+              <button class="btn btn-primary" id="addInvBtn">Add Investment</button>
+            </div>
+          </div>
+          <div style="font-size:12px; color:var(--text-d); margin-bottom:14px; display:flex; justify-content:flex-end;">
+            <span>Stock prices as of: <strong id="pricesAsOf">—</strong></span>
+          </div>
+
+          <div class="tab-content active" id="tab-fixed">
+            <div class="inv-grid" id="fixedGrid"></div>
+          </div>
+          <div class="tab-content" id="tab-stocks">
+            <div class="inv-grid" id="stocksGrid"></div>
+          </div>
+        </section>
+
+        <!-- ===== Debts & Receivables View ===== -->
+        <section class="view" id="view-debts">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h2 style="font-family:'Fraunces',serif; font-size:26px; font-weight:500;">Debts & Receivables</h2>
+              <div style="font-size:13px; color:var(--text-m);">Track money owed to you and money you owe (isolated from net worth)</div>
+            </div>
+            <button class="btn btn-primary" onclick="window.openAddDebtModal()">+ Record Loan / Debt</button>
+          </div>
+
+          <div class="dash-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+            <!-- Receivables (Lent) Column -->
+            <div class="card">
+              <div class="card-label" style="color:var(--emerald); margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+                <span>Owed to You (Receivables)</span>
+                <span id="totalReceivablesBadge" style="font-size:14px; font-weight:700;">GH₵0.00</span>
+              </div>
+              <div id="receivablesList" class="exp-list"></div>
+            </div>
+
+            <!-- Payables (Borrowed) Column -->
+            <div class="card">
+              <div class="card-label" style="color:var(--rose); margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+                <span>You Owe (Payables)</span>
+                <span id="totalPayablesBadge" style="font-size:14px; font-weight:700;">GH₵0.00</span>
+              </div>
+              <div id="payablesList" class="exp-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Reports & Summaries View ===== -->
+        <section class="view" id="view-reports">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div class="card-label">Annual Spend Reports & Aggregation Engine</div>
+              <div style="font-size:20px; font-weight:700; color:var(--text); margin-top:2px;">Yearly Breakdown & Insights</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <label class="form-label" style="margin:0;">Select Year:</label>
+              <select class="form-input" id="reportYearSelect" onchange="renderReports(parseInt(this.value))" style="width:110px; padding:6px 12px; font-size:13px;">
+                <option value="2026" selected>2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Annual Spend Overview Card -->
+          <div class="card" style="background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(251,191,36,0.06)); margin-bottom: 20px;">
+            <div class="card-label" style="margin-bottom: 14px;">Annual Spend Summary</div>
+            <div class="cashflow-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap:16px;">
+              <div>
+                <div class="metric-label">Total Year-to-Date Spend</div>
+                <div style="font-size:24px; font-weight:700; color:var(--rose);" id="reportYearTotal">GH₵0.00</div>
+              </div>
+              <div>
+                <div class="metric-label">Average Monthly Expense</div>
+                <div style="font-size:22px; font-weight:600; color:var(--gold);" id="reportMonthlyAvg">GH₵0.00</div>
+              </div>
+              <div>
+                <div class="metric-label">Highest Spending Month</div>
+                <div style="font-size:20px; font-weight:600; color:var(--indigo);" id="reportHighestMonth">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 12-Month Expense Grid Card -->
+          <div class="card" style="margin-bottom: 20px;">
+            <div class="card-label" style="margin-bottom: 16px;">12-Month Expense Breakdown (Jan - Dec)</div>
+            <div class="reports-month-grid" id="reportsMonthGrid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:12px;"></div>
+          </div>
+
+          <!-- Category Spending Distribution -->
+          <div class="card">
+            <div class="card-label" style="margin-bottom: 16px;">Category Spending Distribution</div>
+            <div id="reportsCatGrid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px;"></div>
+          </div>
+        </section>
+
+        <!-- ===== Settings View ===== -->
+        <section class="view" id="view-settings">
+          <div style="max-width:680px;">
+            <!-- Financial Profile & Payday Preferences -->
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-label" style="margin-bottom:18px;">Financial Profile & Payday Preferences</div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Base Monthly Salary / Paycheck (GH₵)</label>
+                <input type="number" class="form-input" id="setSalary" step="0.01" min="0">
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Monthly Spending Budget Threshold (GH₵)</label>
+                <input type="number" class="form-input" id="setLimit" step="0.01" min="0">
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Payday Day of Month (e.g. 25th)</label>
+                <input type="number" class="form-input" id="setPayday" min="1" max="31" placeholder="25">
+              </div>
+              <div class="form-group" style="margin-bottom:18px;">
+                <label class="form-label">USD Conversion Rate (1 GH₵ = X USD)</label>
+                <input type="number" class="form-input" id="setUsdRate" step="0.0001" min="0" placeholder="0.065">
+              </div>
+              <button class="btn btn-primary" id="saveSettingsBtn">Save Preferences</button>
+            </div>
+
+            <!-- Payday Allocation Rules -->
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-label" style="margin-bottom:14px;">Payday Allocation Rules (1-Click Salary Routing)</div>
+              <div style="font-size:13px; color:var(--text-m); margin-bottom:16px;">Set default amounts to automatically route when your monthly paycheck arrives:</div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">T-Bills Allocation (GH₵)</label>
+                  <input type="number" class="form-input" id="setAllocTbills" placeholder="500.00" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Bank Savings (GH₵)</label>
+                  <input type="number" class="form-input" id="setAllocSavings" placeholder="300.00" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">MoMo Spending (GH₵)</label>
+                  <input type="number" class="form-input" id="setAllocMomo" placeholder="1100.00" step="0.01" min="0">
+                </div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; flex-wrap:wrap; gap:10px;">
+                <button class="btn btn-ghost" id="runPayAllocationBtn" style="font-size:13px; color:var(--gold);">⚡ Run Salary Allocation Now</button>
+                <span style="font-size:11px; color:var(--text-d);" id="lastAllocStatus">Last run: Never</span>
+              </div>
+            </div>
+
+            <!-- Native PWA App Installation -->
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-label" style="margin-bottom:12px;">App Installation</div>
+              <p style="font-size:13px; color:var(--text-m); margin-bottom:14px; line-height:1.5;">Install Aura Wealth OS directly onto your home screen for quick 1-tap launch and full offline access.</p>
+              <button class="btn btn-emerald" id="pwa-install-btn" onclick="triggerPwaInstall()">Install App on Device</button>
+              <div style="font-size:11px; color:var(--text-d); margin-top:10px;">
+                * On iOS Safari, tap the <strong>Share</strong> icon and select <strong>'Add to Home Screen'</strong>.
+              </div>
+            </div>
+
+            <!-- Appearance -->
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-label" style="margin-bottom:18px;">Appearance</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-size:14px;font-weight:600;">Light mode</div>
+                  <div style="font-size:12px;color:var(--text-d);margin-top:2px;">Switch between dark Mica and light Liquid glass</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="lightModeSwitch">
+                  <span class="switch-track" id="switchTrack"></span>
+                  <span class="switch-thumb" id="switchThumb"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Account & Cloud Synchronization Status -->
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-label" style="margin-bottom:18px;">Account & Cloud Synchronization</div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <div>
+                  <div style="font-size:14px; font-weight:600;" id="settingsAccountName">Guest (Local Profile)</div>
+                  <div style="font-size:12px; color:var(--text-d); margin-top:2px;" id="settingsAccountStatus">Data saved locally on this device</div>
+                </div>
+                <button class="btn btn-ghost" id="authModalBtn">Manage Cloud Auth</button>
+              </div>
+            </div>
+
+            <!-- Whole-Project Simple User Guide (12-Year-Old Level) in Settings Tab -->
+            <section id="user-guide-section" class="mica-card settings-group card" style="margin-bottom:18px;">
+              <div class="card-label" style="margin-bottom:14px;">Complete Aura User Guide (Easy Manual)</div>
+              
+              <details class="mica-accordion help-accordion" style="margin-bottom:10px;">
+                <summary>🎯 Today's Daily Cash (Safe-to-Spend Engine)</summary>
+                <div class="accordion-body">
+                  <p><strong>Baseline Plan:</strong> Imagine you have GH₵1,500 for a 30-day month. Your starting goal is to spend no more than <strong>GH₵50.00 every day</strong> (GH₵1,500 divided by 30 days). That keeps your daily pocket money clean and equal!</p>
+                  <p style="margin-top:8px;"><strong>Dynamic Compass:</strong> If you buy a big data bundle today or spend GH₵90, tomorrow's daily limit drops automatically so you do not run out of cash before payday. But if you spend GH₵0 today, your daily safe-to-spend limit goes right back up! It is like a smart compass guiding your wallet every morning.</p>
+                </div>
+              </details>
+
+              <details class="mica-accordion help-accordion" style="margin-bottom:10px;">
+                <summary>📱 Mobile Money & Cash Wallets</summary>
+                <div class="accordion-body">
+                  <p><strong>Why Separate?</strong> Imagine having labeled piggy banks in your room: one for MTN MoMo, one for Telecel Cash, one for AT Money, one for your Bank Account, and one for Physical Cash in your drawer. Keeping them in separate boxes inside the app means your app balances always match your real phone and bank balances down to the exact pesewa! No more guessing where your money went.</p>
+                </div>
+              </details>
+
+              <details class="mica-accordion help-accordion" style="margin-bottom:10px;">
+                <summary>🛡️ Emergency Survival Time (Runway)</summary>
+                <div class="accordion-body">
+                  <p><strong>Survival Clock:</strong> The app looks at all your total spendable cash and divides it by your monthly expenses. It tells you exactly how many months you could keep living comfortably if you stopped making money today. If your clock shows 6 Months, you have 6 full months of safety if anything unexpected happens!</p>
+                </div>
+              </details>
+
+              <details class="mica-accordion help-accordion" style="margin-bottom:10px;">
+                <summary>⚡ Payday 1-Click Piggy Banks</summary>
+                <div class="accordion-body">
+                  <p><strong>Auto-Sorting Salary:</strong> When payday arrives, you do not need to manually calculate where every pesewa goes. Set up your payday allocation rules once, and in just one tap, your paycheck splits automatically into Treasury Bills for long-term growth, Bank Savings for safety reserves, and Mobile Money for your daily spending!</p>
+                </div>
+              </details>
+
+              <details class="mica-accordion help-accordion" style="margin-bottom:10px;">
+                <summary>💸 Airtime, Data Bundles & E-Levy Fees</summary>
+                <div class="accordion-body">
+                  <p><strong>Counting Extra Fees:</strong> Small expenses add up quickly! When you buy GH₵20 airtime, a GH₵50 data bundle, or pay a GH₵1 transfer fee (like E-Levy) when sending money to friends and family, logging those small fees keeps your digital wallets perfectly accurate down to the pesewa.</p>
+                </div>
+              </details>
+
+              <details class="mica-accordion help-accordion">
+                <summary>📄 Proof-of-Funds PDF Generator</summary>
+                <div class="accordion-body">
+                  <p><strong>Official Printouts:</strong> Need to show proof of your financial standing for official reviews, personal records, or bank checkups? Clicking export generates a clean, bank-style 1-page summary of all your liquid cash assets, investments, and net worth ready for printing!</p>
+                </div>
+              </details>
+            </section>
+
+            <!-- Data & Export Management -->
+            <div class="card">
+              <div class="card-label" style="margin-bottom:14px;">Data & Reports Management</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn btn-ghost" id="loadSampleBtn">Load Sample Data</button>
+                <button class="btn btn-ghost" id="exportCsvBtn">Export CSV Report</button>
+                <button class="btn btn-ghost" id="exportPdfBtn">Export PDF Report</button>
+                <button class="btn btn-ghost" id="clearDataBtn" onclick="clearAllData()" style="color:var(--rose);">Clear All Data</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Mobile Bottom Nav & FAB -->
+  <nav class="mobile-nav">
+    <button class="nav-item active" data-view="dashboard" title="Dashboard"></button>
+    <button class="nav-item" data-view="accounts" title="Accounts"></button>
+    <button class="nav-item" data-view="investments" title="Portfolio"></button>
+    <button class="nav-item" data-view="expenses" title="Transactions"></button>
+    <button class="nav-item" data-view="debts" title="Debts"></button>
+    <button class="nav-item" data-view="reports" title="Reports"></button>
+    <button class="nav-item" data-view="settings" title="Settings"></button>
+  </nav>
+  <button class="fab" id="fabBtn" title="Quick add expense"></button>
+
+  <!-- Investment Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Add Investment</div>
+        <button class="modal-close" id="modalClose"></button>
+      </div>
+      <div class="type-selector" id="typeSelector">
+        <button class="type-opt active" data-type="tbill">T-Bill</button>
+        <button class="type-opt" data-type="gcb_master_wealth">GCB Wealth</button>
+        <button class="type-opt" data-type="stock">Stock</button>
+      </div>
+      <div id="invForm"></div>
+    </div>
+  </div>
+
+  <!-- Income Modal -->
+  <div class="modal-overlay" id="incomeModalOverlay">
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-header">
+        <div class="modal-title">Log Income</div>
+        <button class="modal-close" id="incomeModalClose"></button>
+      </div>
+      <form id="incomeForm">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Income Category</label>
+          <select class="form-input" id="incCategory" onchange="onIncCategoryChange(this.value)" required>
+            <option value="salary">Salary / Paycheck</option>
+            <option value="savings">Savings</option>
+            <option value="dividends">Stock Dividends</option>
+            <option value="tbill_yield">T-Bill Interest / Yield</option>
+            <option value="business">Business / Side-Hustle</option>
+            <option value="gift">Gift / Bonus</option>
+            <option value="misc">Misc Income</option>
+            <option value="custom">+ Type Custom Category...</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Destination Account</label>
+          <select class="form-input" id="incDestAccount">
+            <option value="bank_cash">Bank Account (Savings)</option>
+            <option value="mtn_momo_cash">MTN Mobile Money</option>
+            <option value="telecel_cash">Telecel Cash</option>
+            <option value="at_money_cash">AT Money (AirtelTigo)</option>
+            <option value="home_cash">Physical Home Cash</option>
+          </select>
+        </div>
+        <div class="form-group" id="customIncCategoryContainer" style="display:none; margin-bottom:12px;">
+          <label class="form-label">Custom Category Name</label>
+          <input type="text" class="form-input" id="customIncCategory" placeholder="e.g. Freelance Consulting">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount (GH₵)</label>
+            <input type="number" class="form-input" id="incAmount" placeholder="2500.00" step="0.01" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="incDate">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:18px;">
+          <label class="form-label">Notes (optional)</label>
+          <input type="text" class="form-input" id="incNotes" placeholder="e.g. Dividend payout from MTNGH">
+        </div>
+        <button type="submit" class="btn btn-emerald" style="width:100%;">+ Save Income Entry</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Initial App Gateway Modal -->
+  <div class="modal-overlay" id="authGatewayModalOverlay">
+    <div class="modal" id="auth-gateway-modal" style="max-width:440px; text-align:center; padding:32px 28px;">
+      <div style="margin-bottom:24px;">
+        <div class="brand-mark" style="margin:0 auto 14px; width:52px; height:52px; font-size:26px;">A</div>
+        <div style="font-family:'Fraunces',serif; font-size:26px; font-weight:600; letter-spacing:-0.02em;">Welcome to Aura Wealth OS</div>
+        <div style="font-size:14px; color:var(--text-m); margin-top:8px;">Select how you would like to proceed:</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <button class="btn btn-primary" id="gatewaySignInBtn" style="width:100%; padding:14px; font-size:15px; font-weight:700;">Sign In / Create Account</button>
+        <button class="btn btn-ghost" id="gatewayGuestBtn" style="width:100%; padding:14px; font-size:15px; font-weight:700; border:1px solid var(--glass-h) !important;">Use as Guest</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- First-Time 10-Second Onboarding Modal -->
+  <div class="modal-overlay" id="onboardingModalOverlay">
+    <div class="modal" id="onboarding-modal" style="max-width:440px;">
+      <div style="text-align:center; margin-bottom:20px;">
+        <div class="brand-mark" style="margin:0 auto 12px; width:48px; height:48px; font-size:24px;">A</div>
+        <div style="font-family:'Fraunces',serif; font-size:24px; font-weight:600;">Set Up Baseline</div>
+        <div style="font-size:13px; color:var(--text-m); margin-top:4px;">Set up your baseline in 10 seconds</div>
+      </div>
+      <form id="onboardingForm">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">1. Monthly Paycheck / Budget (GH₵)</label>
+          <input type="number" class="form-input" id="onboardSalary" placeholder="e.g. 5000" step="0.01" min="0" required autofocus>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">2. Spendable Liquid Cash (GH₵)</label>
+          <input type="number" class="form-input" id="onboardCash" placeholder="e.g. 8500" step="0.01" min="0" required>
+        </div>
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label">3. Total Locked Investments (GH₵)</label>
+          <input type="number" class="form-input" id="onboardInvestments" placeholder="e.g. 25000" step="0.01" min="0" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Calculate Net Worth & Launch</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cloud Auth Modal -->
+  <div class="modal-overlay" id="authModalOverlay">
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-header">
+        <div class="modal-title">Cloud Authentication</div>
+        <button class="modal-close" id="authModalClose"></button>
+      </div>
+
+      <div class="tabs" style="margin-bottom:16px; width:100%;">
+        <button class="tab active" id="authTabPass" onclick="switchAuthTab('password')" style="flex:1; text-align:center;">Password Login</button>
+        <button class="tab" id="authTabMagic" onclick="switchAuthTab('magic')" style="flex:1; text-align:center;">Magic Link / OTP</button>
+      </div>
+
+      <!-- Password Auth View -->
+      <div id="authPassView">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" id="authEmail" placeholder="user@example.com">
+        </div>
+        <div class="form-group" style="margin-bottom:6px;">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="authPassword" placeholder="••••••••">
+        </div>
+        <div style="text-align:right; margin-bottom:16px;">
+          <button type="button" class="btn btn-ghost" id="forgotPassBtn" style="font-size:11px; padding:4px 8px; border:none;">Forgot Password?</button>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:14px;">
+          <button class="btn btn-primary" id="signInBtn" style="flex:1;">Sign In</button>
+          <button class="btn btn-ghost" id="signUpBtn" style="flex:1;">Sign Up</button>
+        </div>
+      </div>
+
+      <!-- Magic Link / OTP View -->
+      <div id="authMagicView" style="display:none;">
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label">Email Address for Magic Link / OTP</label>
+          <input type="email" class="form-input" id="magicEmail" placeholder="user@example.com">
+        </div>
+        <button class="btn btn-primary" id="sendMagicBtn" style="width:100%; margin-bottom:14px;">Send Magic Link / OTP</button>
+      </div>
+
+      <div style="text-align:center;">
+        <button class="btn btn-ghost" id="signOutBtn" style="width:100%; color:var(--rose); display:none;">Sign Out Current User</button>
+      </div>
+    </div>
+  </div>
+  <!-- Internal Transfer Modal -->
+  <div class="modal-overlay" id="transferModalOverlay">
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-header">
+        <div class="modal-title">Internal Transfer (Between Vaults)</div>
+        <button class="modal-close" id="transferModalClose" onclick="closeTransferModal()"></button>
+      </div>
+      <form id="transferForm" onsubmit="event.preventDefault(); executeTransferModal();">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">From Account</label>
+          <select class="form-input" id="trfFromAccount">
+            <option value="bank_cash">Bank Account (Savings)</option>
+            <option value="mtn_momo_cash">MTN Mobile Money</option>
+            <option value="telecel_cash">Telecel Cash</option>
+            <option value="at_money_cash">AT Money (AirtelTigo)</option>
+            <option value="home_cash">Physical Home Cash</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">To Account</label>
+          <select class="form-input" id="trfToAccount">
+            <option value="mtn_momo_cash">MTN Mobile Money</option>
+            <option value="telecel_cash">Telecel Cash</option>
+            <option value="at_money_cash">AT Money (AirtelTigo)</option>
+            <option value="bank_cash">Bank Account (Savings)</option>
+            <option value="home_cash">Physical Home Cash</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Transfer Amount (GH₵)</label>
+          <input type="number" class="form-input" id="trfAmount" placeholder="0.00" step="0.01" min="0.01" oninput="window.onFeeAmountInput('trf', this.value)" required>
+        </div>
+        <div style="margin-bottom:14px; background:var(--glass); padding:10px 14px; border-radius:12px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="trfFeeToggle" onchange="window.toggleFeeInput('trf')"> Include Transfer / MoMo Fee
+          </label>
+          <div id="trfFeeContainer" style="display:none; margin-top:10px;">
+            <label class="form-label">Fee Amount (GH₵) <span style="font-size:10px; color:var(--text-d);">(E-Levy ~1% over ₵100/day)</span></label>
+            <input type="number" class="form-input" id="trfFeeAmount" placeholder="0.00" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label">Notes (optional)</label>
+          <input type="text" class="form-input" id="trfNotes" placeholder="e.g. Weekly MoMo allocation">
+        </div>
+        <button type="submit" class="btn btn-emerald" style="width:100%;">Execute Transfer</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Account Balance Modal -->
+  <div class="modal-overlay" id="editBalanceModalOverlay">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-header">
+        <div class="modal-title" id="editBalanceModalTitle">Edit Account Balance</div>
+        <button class="modal-close" onclick="closeEditBalanceModal()"></button>
+      </div>
+      <form id="editBalanceForm" onsubmit="event.preventDefault(); saveAccountBalanceModal();">
+        <input type="hidden" id="editBalanceAccountType">
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label" id="editBalanceLabel">New Balance Amount</label>
+          <input type="number" class="form-input" id="editBalanceInput" step="0.01" min="0" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Save Balance</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payday Allocation Modal -->
+  <div class="modal-overlay" id="payAllocationModalOverlay">
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-header">
+        <div class="modal-title">1-Click Salary Allocation</div>
+        <button class="modal-close" onclick="window.closePayAllocationModal()"></button>
+      </div>
+      <div style="font-size:13px; color:var(--text-m); margin-bottom:16px;">
+        Review and confirm your payday salary routing for <strong id="allocModalCycle">Cycle</strong>:
+      </div>
+      <form id="payAllocationForm" onsubmit="event.preventDefault(); window.confirmPayAllocation();">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Locked Investments (T-Bills)</label>
+          <input type="number" class="form-input" id="modalAllocTbills" step="0.01" min="0" required>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Bank Savings Reserve</label>
+          <input type="number" class="form-input" id="modalAllocSavings" step="0.01" min="0" required>
+        </div>
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label">MoMo Active Spending</label>
+          <input type="number" class="form-input" id="modalAllocMomo" step="0.01" min="0" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Confirm & Route Salary</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Debt Record Modal -->
+  <div class="modal-overlay" id="debtModalOverlay">
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-header">
+        <div class="modal-title">Record Loan / Debt</div>
+        <button class="modal-close" onclick="window.closeDebtModal()"></button>
+      </div>
+      <form id="debtForm" onsubmit="event.preventDefault(); window.saveDebt();">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Type</label>
+          <select class="form-input" id="debtDirection" required>
+            <option value="lent">Money You Lent (They owe you)</option>
+            <option value="borrowed">Money You Borrowed (You owe them)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Counterparty (Borrower / Lender Name)</label>
+          <input type="text" class="form-input" id="debtCounterparty" placeholder="e.g. Kwame Mensah" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Total Amount (GH₵)</label>
+            <input type="number" class="form-input" id="debtAmount" placeholder="500.00" step="0.01" min="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due Date (optional)</label>
+            <input type="date" class="form-input" id="debtDueDate">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:18px;">
+          <label class="form-label">Notes (optional)</label>
+          <input type="text" class="form-input" id="debtNotes" placeholder="e.g. Emergency loan for car repairs">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Save Record</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Repay Debt Modal -->
+  <div class="modal-overlay" id="repayDebtModalOverlay">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-header">
+        <div class="modal-title">Record Repayment</div>
+        <button class="modal-close" onclick="window.closeRepayDebtModal()"></button>
+      </div>
+      <form id="repayDebtForm" onsubmit="event.preventDefault(); window.executeRepayDebt();">
+        <input type="hidden" id="repayDebtId">
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label" id="repayDebtLabel">Repayment Amount (GH₵)</label>
+          <input type="number" class="form-input" id="repayDebtInput" step="0.01" min="0.01" required>
+        </div>
+        <button type="submit" class="btn btn-emerald" style="width:100%;">Record Repayment</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Slide-Over Quick Guide Modal (Microsoft Mica Style) -->
+  <div class="modal-overlay slide-over-overlay" id="helpModalOverlay">
+    <div class="slide-over-drawer" id="help-modal">
+      <div class="slide-over-content">
+        <div class="help-drawer-header">
+          <div class="help-drawer-title">Aura Quick Guide</div>
+          <button class="modal-close" id="helpModalClose" onclick="window.closeHelpModal()">✕</button>
+        </div>
+        <div class="help-drawer-body">
+          <details class="help-accordion" open>
+            <summary>🎯 What is Today's Spending Cash?</summary>
+            <div class="accordion-body">
+              <p><strong>Summary:</strong> How your daily allowance works.</p>
+              <p style="margin-top:6px;"><strong>Details:</strong> Explains how buying a big internet data bundle today reduces tomorrow's daily limit automatically so you never run out of money before payday!</p>
+            </div>
+          </details>
+
+          <details class="help-accordion">
+            <summary>📱 Why are MTN, Telecel, and AT Money Separated?</summary>
+            <div class="accordion-body">
+              <p><strong>Summary:</strong> Managing your digital cash vaults.</p>
+              <p style="margin-top:6px;"><strong>Details:</strong> Explains keeping cash in separate telco pockets (MTN MoMo, Telecel Cash, AT Money, Bank, and Physical Cash) to track every wallet accurately down to the exact pesewa.</p>
+            </div>
+          </details>
+
+          <details class="help-accordion">
+            <summary>🛡️ What is Emergency Survival Time (Runway)?</summary>
+            <div class="accordion-body">
+              <p><strong>Summary:</strong> Your safety survival timer.</p>
+              <p style="margin-top:6px;"><strong>Details:</strong> Explains how many months you could keep living comfortably if you stopped earning money today by dividing your total spendable cash by monthly expenses.</p>
+            </div>
+          </details>
+
+          <details class="help-accordion">
+            <summary>💸 How do Airtime, Data, and Fees work?</summary>
+            <div class="accordion-body">
+              <p><strong>Summary:</strong> Logging daily telco expenses accurately.</p>
+              <p style="margin-top:6px;"><strong>Details:</strong> Explains how counting extra transfer fees, airtime purchases, and E-Levy charges keeps your real phone balances matching your app balances perfectly.</p>
+            </div>
+          </details>
+        </div>
+        <div class="help-drawer-footer">
+          <p style="margin-bottom:10px;">Need the full guide? Explore complete instructions for payday piggy banks, proof-of-funds statements, and app settings.</p>
+          <button class="btn btn-primary" id="go-to-full-settings-guide" style="width:100%;">Open Full Guide in Settings →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Script -->
+  <script src="app.js?v=3"></script>
+</body>
+</html>
