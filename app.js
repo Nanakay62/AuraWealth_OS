@@ -2,18 +2,7 @@
    AURA WEALTH OS - PWA ENGINE & TRUE ZERO SLATE CASH FLOW ENGINE
    ============================================================ */
 
-// Auto-purge check on script load: if localStorage contains any item with 'Pillar Cafe' or '15,000', clear localStorage immediately
-(function autoPurgeStaleCache() {
-  try {
-    const raw = JSON.stringify(localStorage);
-    if (raw.includes('Pillar Cafe') || raw.includes('15,000') || raw.includes('15000') || raw.includes('Shoprite') || raw.includes('ECG') || raw.includes('GCB Master Wealth')) {
-      localStorage.clear();
-      console.log('Stale cached data automatically purged from localStorage.');
-    }
-  } catch (e) {
-    console.warn('Auto-purge error:', e);
-  }
-})();
+// Local storage persistence enabled - user inputs strictly retained
 
 const DEFAULT_SUPABASE_URL = 'https://xzaljrdrtfxlvgmilojp.supabase.co';
 const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6YWxqcmRydGZ4bHZnbWlsb2pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Nzg4ODQsImV4cCI6MjEwMTM1NDg4NH0.yy97AayWEsVVvgcxPena31C-_zDaTkNw0ZjhoVa7BCA';
@@ -400,17 +389,12 @@ function initSupabase() {
 
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (session && session.user) {
-        // Authoritative cloud load: Bypass/clear local storage cache to ensure multi-device sync integrity
-        localStorage.removeItem('aura_wealth_v2');
-        localStorage.removeItem('aura_wealth_data');
         setAuthUser(session.user);
         await hydrateSupabase();
         closeGatewayModal();
       } else {
-        localStorage.removeItem('aura_wealth_v2');
-        localStorage.removeItem('aura_wealth_data');
-        state = JSON.parse(JSON.stringify(defaultState));
         setAuthUser(null);
+        loadFromStorage();
         renderAll();
         checkGateway();
       }
