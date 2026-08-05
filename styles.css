@@ -194,10 +194,22 @@ button, input, select { font: inherit; }
 
 .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 20px; }
 
-/* Hero Net Worth Card */
-.net-worth-card { grid-column: 1 / -1; background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(99,102,241,0.06)); border: none !important; border-radius: var(--r-m); padding: 32px; position: relative; overflow: hidden; box-shadow: var(--sh-l); }
-.net-worth-card::before { content: ''; position: absolute; top: -40%; right: -15%; width: 380px; height: 380px; background: radial-gradient(circle, var(--gold-g), transparent 70%); filter: blur(30px); pointer-events: none; }
-.net-worth-card::after { content: ''; position: absolute; bottom: -30%; left: -10%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(99,102,241,0.12), transparent 70%); filter: blur(30px); pointer-events: none; }
+/* Hero Net Worth Card (Pure Surface with No Additional Gradients) */
+.net-worth-card {
+  grid-column: 1 / -1;
+  background: var(--glass);
+  border: 1px solid var(--surface-border) !important;
+  border-radius: var(--r-m);
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--sh-l);
+}
+.net-worth-card::before,
+.net-worth-card::after {
+  display: none !important;
+  content: none !important;
+}
 .nw-content { position: relative; z-index: 1; }
 .nw-header-row { display: flex; justify-content: space-between; align-items: center; }
 .net-worth-value { font-family: 'IBM Plex Sans', -apple-system, sans-serif !important; font-size: clamp(36px, 5vw, 54px); font-weight: 600; letter-spacing: -0.03em; margin: 8px 0 4px; font-variant-numeric: tabular-nums lining-nums; background: linear-gradient(135deg, #fff, rgba(255,255,255,0.68)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
