@@ -305,10 +305,26 @@
         <!-- ===== Expenses & Income View ===== -->
         <section class="view" id="view-expenses">
           <div class="card exp-form-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
               <div class="card-label">Log Transaction</div>
-              <button class="btn btn-emerald" onclick="openIncomeModal()" style="font-size:12px; padding:6px 14px;">+ Log Income</button>
+              <div class="txn-segment-control">
+                <button class="txn-seg-btn active" id="segExpenseBtn" type="button">Expense</button>
+                <button class="txn-seg-btn" id="segIncomeBtn" type="button" onclick="openIncomeModal()">Income</button>
+              </div>
             </div>
+
+            <!-- Mobile Compact 2-Tile Summary Strip -->
+            <div class="mobile-summary-strip">
+              <div class="summary-tile">
+                <span class="summary-tile-label">Today's Spent</span>
+                <span class="summary-tile-val" id="mobileTodaySpent">GH₵0.00</span>
+              </div>
+              <div class="summary-tile">
+                <span class="summary-tile-label">This Week</span>
+                <span class="summary-tile-val" id="mobileWeekSpent">GH₵0.00</span>
+              </div>
+            </div>
+
             <div class="cat-pills" id="catPills">
               <button class="cat-pill active" data-cat="food">Food</button>
               <button class="cat-pill" data-cat="transport">Transport</button>
@@ -329,12 +345,14 @@
               </div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Expense Amount (GH₵)</label>
-                <input type="number" class="form-input" id="expAmount" placeholder="0.00" step="0.01" min="0">
-              </div>
-              <div class="form-group">
+            <!-- Form Layout with Hero Input & Side-by-Side Payment Source and Date -->
+            <div class="form-group" style="margin-bottom:14px;">
+              <label class="form-label">Expense Amount (GH₵)</label>
+              <input type="number" class="form-input hero-exp-input" id="expAmount" placeholder="0.00" step="0.01" min="0">
+            </div>
+
+            <div class="form-row-2col" style="margin-bottom:14px;">
+              <div class="form-group" style="flex:1; min-width:0;">
                 <label class="form-label">Payment Source</label>
                 <select class="form-input" id="expSource">
                   <option value="bank_cash">Bank Account (Savings)</option>
@@ -344,11 +362,12 @@
                   <option value="home_cash">Physical Home Cash</option>
                 </select>
               </div>
-              <div class="form-group">
+              <div class="form-group" style="flex:1; min-width:0;">
                 <label class="form-label">Date</label>
                 <input type="date" class="form-input" id="expDate">
               </div>
             </div>
+
             <div class="form-group" style="margin-bottom:16px;">
               <label class="form-label">Notes (optional)</label>
               <input type="text" class="form-input" id="expNotes" placeholder="What was this for?">
@@ -385,13 +404,28 @@
               </div>
             </div>
             <div id="historyExpView">
-              <div class="exp-list" id="expList"></div>
+              <div class="exp-list" id="expList">
+                <div class="empty-state">
+                  <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 10h8"/><path d="M8 14h5"/></svg>
+                  <div class="empty-text">No transactions logged yet. Tap a preset above to log your first expense!</div>
+                </div>
+              </div>
             </div>
             <div id="historyIncView" style="display:none;">
-              <div class="exp-list" id="incList"></div>
+              <div class="exp-list" id="incList">
+                <div class="empty-state">
+                  <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 10h8"/><path d="M8 14h5"/></svg>
+                  <div class="empty-text">No transactions logged yet. Tap a preset above to log your first expense!</div>
+                </div>
+              </div>
             </div>
             <div id="historyTrfView" style="display:none;">
-              <div class="exp-list" id="trfList"></div>
+              <div class="exp-list" id="trfList">
+                <div class="empty-state">
+                  <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 10h8"/><path d="M8 14h5"/></svg>
+                  <div class="empty-text">No transactions logged yet. Tap a preset above to log your first expense!</div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -754,7 +788,7 @@
     </button>
     <button class="nav-item" data-view="expenses">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 10h8"/><path d="M8 14h5"/></svg>
-      <span class="nav-label">Activity</span>
+      <span class="nav-label">Transactions</span>
     </button>
     <button id="open-more-menu" class="nav-item nav-btn" data-action="open-more">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>

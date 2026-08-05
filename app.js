@@ -1305,8 +1305,12 @@ function renderExpenses() {
   const cInc = document.getElementById('cycleIncomeTotal');
   const mTot = document.getElementById('monthTotal');
 
+  const mobTTot = document.getElementById('mobileTodaySpent');
+  const mobWTot = document.getElementById('mobileWeekSpent');
   if (tTot) tTot.textContent = fmt(sumExp(getTodayExpenses()));
   if (wTot) wTot.textContent = fmt(sumExp(getWeekExpenses()));
+  if (mobTTot) mobTTot.textContent = fmt(sumExp(getTodayExpenses()));
+  if (mobWTot) mobWTot.textContent = fmt(sumExp(getWeekExpenses()));
   if (cInc) cInc.textContent = fmt(getTotalPaydayIncome());
   if (mTot) mTot.textContent = fmt(sumExp(getPaydayCycleExpenses()));
 
@@ -1314,7 +1318,10 @@ function renderExpenses() {
   if (!container) return;
 
   if (state.expenses.length === 0) {
-    container.innerHTML = `<div class="card empty-state" style="text-align:center;padding:32px;color:var(--text-m);background:var(--glass);">No entries recorded yet.</div>`;
+    container.innerHTML = `<div class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 10h8"/><path d="M8 14h5"/></svg>
+      <div class="empty-text">No transactions logged yet. Tap a preset above to log your first expense!</div>
+    </div>`;
     return;
   }
 
@@ -1358,7 +1365,10 @@ function renderIncomes() {
   if (!container) return;
 
   if (state.incomes.length === 0) {
-    container.innerHTML = `<div class="card empty-state" style="text-align:center;padding:32px;color:var(--text-m);background:var(--glass);">No entries recorded yet.</div>`;
+    container.innerHTML = `<div class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 10h8"/><path d="M8 14h5"/></svg>
+      <div class="empty-text">No transactions logged yet. Tap a preset above to log your first expense!</div>
+    </div>`;
     return;
   }
 

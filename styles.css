@@ -1522,3 +1522,132 @@ select.form-input, select {
   }
 }
 
+/* ============================================================
+   TRANSACTIONS UX POLISH STYLES
+   ============================================================ */
+
+/* Hero Expense Amount Input */
+.hero-exp-input {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #ffb703 !important;
+}
+
+/* 2-Column Responsive Form Row for Payment Source & Date */
+.form-row-2col {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+@media (max-width: 480px) {
+  .form-row-2col {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+}
+
+/* 2-Way Segment Control [ Expense | Income ] */
+.txn-segment-control {
+  display: flex !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+  padding: 3px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--surface-border) !important;
+  gap: 2px !important;
+}
+
+.txn-seg-btn {
+  padding: 6px 14px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.txn-seg-btn.active {
+  background: var(--accent-yellow) !important;
+  color: #000000 !important;
+}
+
+/* Compact 2-Tile Mobile Summary Strip */
+.mobile-summary-strip {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-summary-strip {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+    width: 100% !important;
+  }
+
+  .mobile-summary-strip .summary-tile {
+    background: var(--surface-card) !important;
+    border: 1px solid var(--surface-border) !important;
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+
+  .mobile-summary-strip .summary-tile-label {
+    font-size: 11px !important;
+    color: var(--text-secondary) !important;
+    font-weight: 500 !important;
+  }
+
+  .mobile-summary-strip .summary-tile-val {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+  }
+}
+
+/* Hide FAB on Active Transactions View */
+body:has(#view-expenses.active) .fab,
+body:has(#view-expenses.active) .fab-add,
+.app-window:has(#view-expenses.active) ~ .fab,
+.app-window:has(#view-expenses.active) ~ .fab-add {
+  display: none !important;
+}
+
+/* Enhanced Line-Art Receipt Empty State */
+.empty-state {
+  text-align: center !important;
+  padding: 36px 20px !important;
+  color: var(--text-secondary) !important;
+  background: var(--glass) !important;
+  border: 1px dashed var(--surface-border) !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin: 10px 0 !important;
+}
+
+.empty-state .empty-icon {
+  width: 48px !important;
+  height: 48px !important;
+  color: var(--accent-yellow) !important;
+  opacity: 0.75 !important;
+}
+
+.empty-state .empty-text {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  max-width: 280px !important;
+  line-height: 1.4 !important;
+  color: var(--text-secondary) !important;
+}
+
