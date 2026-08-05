@@ -438,6 +438,17 @@ function setAuthUser(user) {
   }
 }
 
+function mergeById(cloudArr, localArr) {
+  const map = new Map();
+  (localArr || []).forEach(item => {
+    if (item && item.id) map.set(item.id, item);
+  });
+  (cloudArr || []).forEach(item => {
+    if (item && item.id) map.set(item.id, item);
+  });
+  return Array.from(map.values());
+}
+
 async function hydrateSupabase() {
   if (!supabaseClient || !state.authUser) return;
   try {
@@ -450,11 +461,22 @@ async function hydrateSupabase() {
       supabaseClient.from('profiles').select('*').eq('user_id', state.authUser.id).maybeSingle()
     ]);
 
-    state.expenses = expensesRes.data || [];
-    state.investments = investmentsRes.data || [];
-    state.incomes = incomesRes.data || [];
-    if (transfersRes && transfersRes.data) state.transfers = transfersRes.data;
-    if (debtsRes && debtsRes.data) state.debts = debtsRes.data;
+    // Non-destructive merge: local records not yet in cloud are preserved
+    state.expenses = mergeById(expensesRes.data, state.expenses);
+    state.investments = mergeById(investmentsRes.data, state.investments);
+    state.incomes = mergeById(incomesRes.data, state.incomes);
+    if (transfersRes && transfersRes.data) state.transfers = mergeById(transfersRes.data, state.transfers);
+    if (debtsRes && debtsRes.data) state.debts = mergeById(debtsRes.data, state.debts);
+
+    // Auto-retry sync for local records missing from the cloud
+    const cloudExpIds = new Set((expensesRes.data || []).map(e => e.id));
+    (state.expenses || []).filter(e => e.id && !cloudExpIds.has(e.id)).forEach(e => supaMirror('expenses', 'insert', e));
+
+    const cloudIncIds = new Set((incomesRes.data || []).map(i => i.id));
+    (state.incomes || []).filter(i => i.id && !cloudIncIds.has(i.id)).forEach(i => supaMirror('incomes', 'insert', i));
+
+    const cloudInvIds = new Set((investmentsRes.data || []).map(inv => inv.id));
+    (state.investments || []).filter(inv => inv.id && !cloudInvIds.has(inv.id)).forEach(inv => supaMirror('investments', 'insert', inv));
 
     if (profileRes && profileRes.data) {
       const p = profileRes.data;
@@ -507,11 +529,21 @@ async function supaMirror(table, op, row) {
   try {
     const payload = { ...row };
     if (state.authUser) payload.user_id = state.authUser.id;
-    if (op === 'insert') await supabaseClient.from(table).insert(payload);
-    else if (op === 'delete') await supabaseClient.from(table).delete().eq('id', row.id);
-    else if (op === 'update') await supabaseClient.from(table).update(payload).eq('id', row.id);
+    if (op === 'insert') {
+      const { error } = await supabaseClient.from(table).insert(payload);
+      if (error) throw error;
+    }
+    else if (op === 'delete') {
+      const { error } = await supabaseClient.from(table).delete().eq('id', row.id);
+      if (error) throw error;
+    }
+    else if (op === 'update') {
+      const { error } = await supabaseClient.from(table).update(payload).eq('id', row.id);
+      if (error) throw error;
+    }
   } catch (e) {
     console.warn(`Supabase ${op} fallback to local state:`, e);
+    toast(`Cloud sync issue (saved locally): ${e.message || 'unknown error'}`, 'error');
   }
 }
 
@@ -640,7 +672,8 @@ function checkTargetAlert(inv) {
 
 // CRUD Operations (Expenses, Incomes & Internal Transfers)
 function addExpense(exp) {
-  const source = exp.source || 'mtn_momo';
+  const rawSource = exp.source || 'mtn_momo_cash';
+  const source = (rawSource === 'mtn_momo' || rawSource === 'momo') ? 'mtn_momo_cash' : (rawSource === 'bank') ? 'bank_cash' : rawSource;
   const amt = money(exp.amount);
 
   // Account-aware balance deduction
@@ -781,7 +814,8 @@ function deleteExpense(id) {
 }
 
 function addIncome(inc) {
-  const dest = inc.dest || 'bank';
+  const rawDest = inc.dest || 'mtn_momo_cash';
+  const dest = (rawDest === 'mtn_momo' || rawDest === 'momo') ? 'mtn_momo_cash' : (rawDest === 'bank') ? 'bank_cash' : rawDest;
   const amt = money(inc.amount);
 
   // Account-aware balance increment

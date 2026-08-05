@@ -118,35 +118,7 @@
               </div>
             </div>
 
-            <!-- Card 2 (Immediate Below): Active Spending Tracker ("Money to Spend") -->
-            <div class="card active-spending-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(52,211,153,0.06));">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
-                <div class="card-label">Monthly Budget</div>
-                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                  <div id="paydayCountdownBadge" class="tracker-glass-badge" title="Cycle resets automatically on the 25th">🗓️ Cycle</div>
-                  <div id="activeSpendBadge" class="tracker-glass-badge">100% Available</div>
-                </div>
-              </div>
-              <div class="cashflow-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap:16px;">
-                <div>
-                  <div class="metric-label">Spending Target / Budget</div>
-                  <div style="font-size:22px; font-weight:600; color:var(--text);" id="activeSpendTarget">GH₵0.00</div>
-                </div>
-                <div>
-                  <div class="metric-label">Spent So Far</div>
-                  <div style="font-size:22px; font-weight:600; color:var(--rose);" id="activeSpendSpent">- GH₵0.00</div>
-                </div>
-                <div>
-                  <div class="metric-label">Remaining Available to Spend</div>
-                  <div style="font-size:24px; font-weight:700; color:var(--text);" id="activeSpendRemaining">GH₵0.00</div>
-                </div>
-              </div>
-              <div class="progress-bar" style="margin-top:14px;">
-                <div class="progress-fill" id="activeSpendGaugeFill" style="width:0%; background:linear-gradient(90deg, #34d399, #fbbf24);"></div>
-              </div>
-            </div>
-
-            <!-- Card 2b: Safe Daily Spendable Limit Card with Dual-Limit Pacing -->
+            <!-- Card 2: Safe Daily Spendable Limit Card with Dual-Limit Pacing -->
             <div class="card safe-spend-card" style="grid-column: 1 / -1;">
               <div class="safe-spend-header">
                 <div>
@@ -174,6 +146,34 @@
                 <div class="baseline-subtext" id="baselineAnchorSubtext" style="font-size:12px; color:var(--text-m); margin-top:4px;">
                   Target: GH₵0.00/day across 30 days to hit GH₵0.00 budget.
                 </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Active Spending Tracker ("Money to Spend") -->
+            <div class="card active-spending-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(52,211,153,0.06));">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                <div class="card-label">Monthly Budget</div>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                  <div id="paydayCountdownBadge" class="tracker-glass-badge" title="Cycle resets automatically on the 25th">🗓️ Cycle</div>
+                  <div id="activeSpendBadge" class="tracker-glass-badge">100% Available</div>
+                </div>
+              </div>
+              <div class="cashflow-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap:16px;">
+                <div>
+                  <div class="metric-label">Spending Target / Budget</div>
+                  <div style="font-size:22px; font-weight:600; color:var(--text);" id="activeSpendTarget">GH₵0.00</div>
+                </div>
+                <div>
+                  <div class="metric-label">Spent So Far</div>
+                  <div style="font-size:22px; font-weight:600; color:var(--rose);" id="activeSpendSpent">- GH₵0.00</div>
+                </div>
+                <div>
+                  <div class="metric-label">Remaining Available to Spend</div>
+                  <div style="font-size:24px; font-weight:700; color:var(--text);" id="activeSpendRemaining">GH₵0.00</div>
+                </div>
+              </div>
+              <div class="progress-bar" style="margin-top:14px;">
+                <div class="progress-fill" id="activeSpendGaugeFill" style="width:0%; background:linear-gradient(90deg, #34d399, #fbbf24);"></div>
               </div>
             </div>
 
