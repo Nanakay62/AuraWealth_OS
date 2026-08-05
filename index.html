@@ -616,9 +616,20 @@
           </div>
 
           <!-- Category Spending Distribution -->
-          <div class="card">
+          <div class="card" style="margin-bottom: 20px;">
             <div class="card-label" style="margin-bottom: 16px;">Category Spending Distribution</div>
             <div id="reportsCatGrid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px;"></div>
+          </div>
+
+          <!-- Data & Reports Management -->
+          <div class="card">
+            <div class="card-label" style="margin-bottom:14px;">Data & Reports Management</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-ghost" id="loadSampleBtn">Load Sample Data</button>
+              <button class="btn btn-ghost" id="exportCsvBtn">Export CSV Report</button>
+              <button class="btn btn-ghost" id="exportPdfBtn">Export PDF Report</button>
+              <button class="btn btn-ghost" id="clearDataBtn" onclick="clearAllData()" style="color:var(--rose);">Clear All Data</button>
+            </div>
           </div>
         </section>
 
@@ -754,19 +765,7 @@
                 <div class="accordion-body">
                   <p><strong>Official Printouts:</strong> Need to show proof of your financial standing for official reviews, personal records, or bank checkups? Clicking export generates a clean, bank-style 1-page summary of all your liquid cash assets, investments, and net worth ready for printing!</p>
                 </div>
-              </details>
             </section>
-
-            <!-- Data & Export Management -->
-            <div class="card">
-              <div class="card-label" style="margin-bottom:14px;">Data & Reports Management</div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                <button class="btn btn-ghost" id="loadSampleBtn">Load Sample Data</button>
-                <button class="btn btn-ghost" id="exportCsvBtn">Export CSV Report</button>
-                <button class="btn btn-ghost" id="exportPdfBtn">Export PDF Report</button>
-                <button class="btn btn-ghost" id="clearDataBtn" onclick="clearAllData()" style="color:var(--rose);">Clear All Data</button>
-              </div>
-            </div>
           </div>
         </section>
       </div>
