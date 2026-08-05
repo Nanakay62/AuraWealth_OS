@@ -121,7 +121,7 @@
             <!-- Card 2 (Immediate Below): Active Spending Tracker ("Money to Spend") -->
             <div class="card active-spending-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(52,211,153,0.06));">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
-                <div class="card-label">Active Spending Tracker ("Money to Spend")</div>
+                <div class="card-label">Monthly Budget</div>
                 <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                   <div id="paydayCountdownBadge" class="tracker-glass-badge" title="Cycle resets automatically on the 25th">🗓️ Cycle</div>
                   <div id="activeSpendBadge" class="tracker-glass-badge">100% Available</div>
@@ -150,7 +150,7 @@
             <div class="card safe-spend-card" style="grid-column: 1 / -1;">
               <div class="safe-spend-header">
                 <div>
-                  <div class="card-label">Dynamic Safe-to-Spend Daily Limit</div>
+                  <div class="card-label">Safe to Spend Today</div>
                   <div class="safe-spend-amount" id="safeDailyAllowance">GH₵0.00 / day</div>
                   <div id="safe-spend-limit" style="display:none;"></div>
                 </div>
@@ -165,7 +165,7 @@
               <div class="baseline-anchor-box">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                   <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.06em; font-weight:700; color:var(--text-m);">Static Baseline Target:</span>
+                    <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.06em; font-weight:700; color:var(--text-m);">Daily Baseline:</span>
                     <span class="static-target-value" id="staticDailyTarget" style="font-weight:700; font-size:14px; font-variant-numeric:tabular-nums;">GH₵0.00 / day</span>
                     <span id="static-daily-target" style="display:none;"></span>
                   </div>
@@ -180,7 +180,7 @@
             <!-- Card 3: Liquid Assets Location Breakdown Card with Emergency Runway Badge -->
             <div class="card liquid-breakdown-card" style="grid-column: 1 / -1; background: rgba(255,255,255,0.03);">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
-                <div class="card-label">Liquid Cash Assets Breakdown</div>
+                <div class="card-label">Cash & Accounts</div>
                 <div id="emergencyRunwayBadge" class="runway-badge emerald">Runway: 0.0 Months Covered</div>
               </div>
               <div class="liquid-breakdown-grid liquid-cash-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px;">
@@ -215,7 +215,7 @@
             <!-- Net Cash Flow & Savings Rate Summary Card -->
             <div class="card card-income" style="grid-column: 1 / -1;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
-                <div class="card-label">Payday Cycle Cash Flow & Savings Engine</div>
+                <div class="card-label">Monthly Cash Flow</div>
                 <div style="padding:4px 12px; border-radius:12px; background:rgba(52,211,153,0.15); color:var(--emerald); font-weight:800; font-size:12px;" id="savingsRateBadge">Savings Rate: 0%</div>
               </div>
               <div class="cashflow-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:16px;">
@@ -242,7 +242,7 @@
             <div class="card progress-card">
               <div class="progress-header">
                 <div>
-                  <div class="card-label" id="paydayCycleLabel">Spending Progress (Payday Cycle)</div>
+                  <div class="card-label" id="paydayCycleLabel">Payday Countdown</div>
                   <div class="progress-amount" id="spentAmount">GH₵0.00</div>
                 </div>
                 <div style="text-align:right;">

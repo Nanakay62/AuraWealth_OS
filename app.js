@@ -1078,7 +1078,7 @@ function renderDashboard() {
   if (dLeft) dLeft.textContent = `${daysRemaining} days until payday (${payday}th)`;
 
   const paydayLabelEl = document.getElementById('paydayCycleLabel');
-  if (paydayLabelEl) paydayLabelEl.textContent = `Payday Cycle Progress (${payday}th Cycle)`;
+  if (paydayLabelEl) paydayLabelEl.textContent = `Payday Countdown`;
 
   // Dual-Limit Daily Spending Engine (Static Baseline Anchor + Dynamic Pacing)
   const remainingBudget = Math.max(0, limit - paydayCycleExp);
