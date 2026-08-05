@@ -9,6 +9,15 @@
 
 :root {
   --bg: #090c10;
+  --bg-canvas: #090c10;
+  --surface-card: #131822;
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #f0f3f8;
+  --text-secondary: #8b949e;
+  --text-muted: rgba(255, 255, 255, 0.35);
+  --accent-yellow: #fbbf24;
+  --accent-green: #2ec4b6;
+  --accent-red: #e63946;
   --bg-elev: #131822;
   --glass: rgba(255, 255, 255, 0.03);
   --glass-h: rgba(255, 255, 255, 0.05);
@@ -543,16 +552,130 @@ select.form-input, select {
 /* Section Footer */
 .section-footer { text-align: center; padding: 28px 0 10px; margin-top: 24px; color: var(--text-d); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 
-/* Mobile Nav */
-.mobile-nav { display: none; position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--toast-bg); backdrop-filter: blur(24px); border: none !important; border-radius: 20px; padding: 6px; gap: 3px; z-index: 50; box-shadow: var(--sh-l); }
-.mobile-nav .nav-item { width: 54px; height: 46px; padding: 0; justify-content: center; border-radius: 14px; color: var(--toast-text); }
-.mobile-nav .nav-item.active { color: var(--gold-d); }
-.mobile-nav .nav-item span { display: none; }
-.mobile-nav .nav-item.active::before { display: none; }
+/* Mobile Bottom Nav (5 Items, 48px+ Tap Targets) */
+.mobile-nav, .bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100vw;
+  background: var(--toast-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid var(--surface-border, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 18px 18px 0 0;
+  padding: 6px 12px 12px 12px;
+  gap: 4px;
+  z-index: 90;
+  box-shadow: var(--sh-l);
+  justify-content: space-around;
+  align-items: center;
+}
 
-.fab { display: none; position: fixed; bottom: 80px; right: 20px; width: 56px; height: 56px; border-radius: 18px; border: none; background: linear-gradient(135deg, var(--gold), var(--gold-d)); color: #1a1209; cursor: pointer; box-shadow: 0 8px 28px var(--gold-g); z-index: 49; align-items: center; justify-content: center; animation: fabIn 0.3s var(--spring); }
-.fab svg { width: 24px; height: 24px; }
-@keyframes fabIn { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+@media (max-width: 900px) {
+  .mobile-nav, .bottom-nav {
+    display: flex !important;
+  }
+}
+
+.mobile-nav .nav-item, .bottom-nav .nav-item {
+  flex: 1;
+  min-height: 48px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 4px 0 !important;
+  border-radius: 12px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s var(--smooth);
+  gap: 3px;
+  text-decoration: none;
+}
+
+.mobile-nav .nav-item .nav-icon,
+.bottom-nav .nav-item .nav-icon,
+.mobile-nav .nav-item svg,
+.bottom-nav .nav-item svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.mobile-nav .nav-item .nav-label,
+.bottom-nav .nav-item .nav-label,
+.mobile-nav .nav-item span,
+.bottom-nav .nav-item span {
+  display: block !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.01em;
+}
+
+.mobile-nav .nav-item.active,
+.bottom-nav .nav-item.active {
+  color: var(--accent-yellow, var(--gold)) !important;
+  background: rgba(251, 191, 36, 0.08) !important;
+}
+
+.mobile-nav .nav-item.active::before,
+.bottom-nav .nav-item.active::before {
+  display: none !important;
+}
+
+/* Floating Action Button (FAB) Anchor */
+.fab-add, .fab {
+  position: fixed !important;
+  bottom: 84px !important;
+  right: 20px !important;
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  background: var(--accent-yellow, #fbbf24) !important;
+  color: #000000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 6px 20px rgba(255, 183, 3, 0.35) !important;
+  z-index: 99 !important;
+}
+.fab-add svg, .fab svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2.5;
+}
+
+/* More Menu Drawer Modal Items */
+.more-menu-modal .nav-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 14px 16px !important;
+  border-radius: 12px !important;
+  background: var(--glass) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border-subtle) !important;
+  width: 100% !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  transition: all 0.2s var(--smooth) !important;
+}
+.more-menu-modal .nav-item:hover {
+  background: var(--glass-h) !important;
+  border-color: var(--gold-g) !important;
+}
+.more-menu-modal .nav-item svg {
+  width: 22px !important;
+  height: 22px !important;
+  stroke: var(--gold) !important;
+}
 
 /* Custom Stock Inputs & Edit Price Icon */
 #custom-stock-inputs {
@@ -1290,5 +1413,112 @@ select.form-input, select {
 
 [data-theme="light"] #user-guide-section .accordion-body {
   border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================================
+   SECTION 3: CSS GRID & FLEX STRUCTURE FIXES
+   ============================================================ */
+
+/* --- Layout Container & Mobile Bottom Padding --- */
+.main-content, #app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 16px 120px 16px; /* 120px prevents bottom nav cutoff */
+  box-sizing: border-box;
+}
+
+/* --- Primary Net Worth Hero --- */
+.hero-net-worth {
+  font-size: clamp(2rem, 4vw, 2.75rem) !important;
+  font-weight: 800 !important;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+/* --- Safe 2-Column Split for Dashboard Engine Cards --- */
+.dashboard-engine-split {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+  gap: 20px !important;
+  width: 100% !important;
+  margin-bottom: 20px !important;
+}
+
+/* --- Liquid Assets Horizontal Breakdown --- */
+.cash-breakdown-card {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.cash-breakdown-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 16px !important;
+}
+
+.assets-flex-row {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  gap: 12px !important;
+}
+
+.asset-item {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+/* Dim Zero-Balance States */
+.asset-item[data-zero="true"], .portfolio-tile[data-zero="true"] {
+  opacity: 0.4;
+}
+
+/* --- Payday Weekly Calendar Day Bar (Horizontal Lock) --- */
+.weekly-days-container {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-top: 12px !important;
+  padding: 8px 0 !important;
+}
+
+.day-pill {
+  flex: 1 !important;
+  text-align: center !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: var(--text-secondary);
+}
+
+/* --- Compact Investment Portfolio Grid --- */
+.portfolio-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+.portfolio-tile {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+/* --- Responsive Mobile Adjustments --- */
+@media (max-width: 768px) {
+  .assets-flex-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
 }
 

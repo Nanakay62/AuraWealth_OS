@@ -400,15 +400,16 @@ function initSupabase() {
 
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (session && session.user) {
+        // Authoritative cloud load: Bypass/clear local storage cache to ensure multi-device sync integrity
+        localStorage.removeItem('aura_wealth_v2');
+        localStorage.removeItem('aura_wealth_data');
         setAuthUser(session.user);
         await hydrateSupabase();
         closeGatewayModal();
       } else {
-        if (event === 'SIGNED_OUT') {
-          localStorage.removeItem('aura_wealth_v2');
-          localStorage.removeItem('aura_wealth_data');
-          state = JSON.parse(JSON.stringify(defaultState));
-        }
+        localStorage.removeItem('aura_wealth_v2');
+        localStorage.removeItem('aura_wealth_data');
+        state = JSON.parse(JSON.stringify(defaultState));
         setAuthUser(null);
         renderAll();
         checkGateway();
@@ -681,26 +682,10 @@ function quickLogExpense(amount, category, notes) {
 }
 
 function deleteExpense(id) {
-  const row = state.expenses.find(e => e.id === id);
-  if (row) {
-    const source = row.source || 'mtn_momo';
-    const amt = money(row.amount);
-
-    // Account-aware balance refund
-    if (source === 'mtn_momo' || source === 'mtn_momo_cash' || source === 'momo') state.settings.mtnMomoCash = money(state.settings.mtnMomoCash) + amt;
-    else if (source === 'telecel_cash') state.settings.telecelCash = money(state.settings.telecelCash) + amt;
-    else if (source === 'at_money' || source === 'at_money_cash') state.settings.atMoneyCash = money(state.settings.atMoneyCash) + amt;
-    else if (source === 'bank' || source === 'bank_cash') {
-      state.settings.bankCash = money(state.settings.bankCash) + amt;
-      state.settings.cashBalance = state.settings.bankCash;
-    }
-    else if (source === 'home_cash') state.settings.homeCash = money(state.settings.homeCash) + amt;
-  }
   state.expenses = state.expenses.filter(e => e.id !== id);
   saveToStorage();
-  loadSettingsUI();
   renderAll();
-  toast('Expense deleted & balance restored', 'info');
+  toast('Expense deleted', 'info');
   supaMirror('expenses', 'delete', { id });
 }
 
@@ -1078,7 +1063,7 @@ function renderDashboard() {
   if (dLeft) dLeft.textContent = `${daysRemaining} days until payday (${payday}th)`;
 
   const paydayLabelEl = document.getElementById('paydayCycleLabel');
-  if (paydayLabelEl) paydayLabelEl.textContent = `Payday Countdown`;
+  if (paydayLabelEl) paydayLabelEl.textContent = `Payday Countdown (${payday}th Cycle)`;
 
   // Dual-Limit Daily Spending Engine (Static Baseline Anchor + Dynamic Pacing)
   const remainingBudget = Math.max(0, limit - paydayCycleExp);
@@ -1662,13 +1647,28 @@ function switchView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const targetView = document.getElementById(`view-${view}`);
   if (targetView) targetView.classList.add('active');
+  const moreViews = ['debts', 'reports', 'settings'];
   document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.view === view);
   });
+  const moreBtn = document.getElementById('open-more-menu');
+  if (moreBtn) {
+    moreBtn.classList.toggle('active', moreViews.includes(view));
+  }
 }
 
 function switchTab(view) {
   switchView(view);
+}
+
+function openMoreMenuModal() {
+  const modal = document.getElementById('moreMenuModalOverlay');
+  if (modal) modal.classList.add('active');
+}
+
+function closeMoreMenuModal() {
+  const modal = document.getElementById('moreMenuModalOverlay');
+  if (modal) modal.classList.remove('active');
 }
 
 function openHelpModal() {
@@ -2654,6 +2654,7 @@ function bindEvents() {
       closeTransferModal();
       closeEditBalanceModal();
       closeHelpModal();
+      closeMoreMenuModal();
       return;
     }
     if (target.classList.contains('modal-overlay') || target.classList.contains('backdrop-overlay') || target.classList.contains('slide-over-overlay') || target.id === 'helpModalOverlay' || target.id === 'help-modal') {
@@ -2663,6 +2664,14 @@ function bindEvents() {
       closeTransferModal();
       closeEditBalanceModal();
       closeHelpModal();
+      closeMoreMenuModal();
+      return;
+    }
+
+    // Open More Options Menu Modal
+    const openMoreBtn = target.closest('#open-more-menu, [data-action="open-more"]');
+    if (openMoreBtn) {
+      openMoreMenuModal();
       return;
     }
 
@@ -2815,7 +2824,7 @@ function bindEvents() {
     });
   }
 
-  // Expense Logger Button & Enter Key Handlers
+  // Expense Logger Button
   const addExpBtn = document.getElementById('addExpBtn');
   if (addExpBtn) {
     addExpBtn.addEventListener('click', () => {
@@ -2830,35 +2839,13 @@ function bindEvents() {
 
       if (!amount || amount <= 0) { toast('Please enter a valid amount', 'error'); return; }
 
-      let created_at;
-      if (date) {
-        const parts = date.split('-').map(Number);
-        const now = new Date();
-        const d = new Date(parts[0], parts[1] - 1, parts[2], now.getHours(), now.getMinutes(), now.getSeconds());
-        created_at = d.toISOString();
-      } else {
-        created_at = new Date().toISOString();
-      }
-
+      const created_at = date ? new Date(date + 'T' + new Date().toTimeString().split(' ')[0]).toISOString() : new Date().toISOString();
       addExpense({ category: state.selectedCat, amount, notes, source, expense_date: date, created_at });
 
       if (amountEl) amountEl.value = '';
       if (notesEl) notesEl.value = '';
       if (dateEl) dateEl.valueAsDate = new Date();
       if (amountEl) amountEl.focus();
-    });
-
-    const expAmtInput = document.getElementById('expAmount');
-    const expNotesInput = document.getElementById('expNotes');
-    [expAmtInput, expNotesInput].forEach(el => {
-      if (el) {
-        el.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            addExpBtn.click();
-          }
-        });
-      }
     });
   }
 
