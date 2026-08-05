@@ -400,16 +400,15 @@ function initSupabase() {
 
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (session && session.user) {
-        // Authoritative cloud load: Bypass/clear local storage cache to ensure multi-device sync integrity
-        localStorage.removeItem('aura_wealth_v2');
-        localStorage.removeItem('aura_wealth_data');
         setAuthUser(session.user);
         await hydrateSupabase();
         closeGatewayModal();
       } else {
-        localStorage.removeItem('aura_wealth_v2');
-        localStorage.removeItem('aura_wealth_data');
-        state = JSON.parse(JSON.stringify(defaultState));
+        if (event === 'SIGNED_OUT') {
+          localStorage.removeItem('aura_wealth_v2');
+          localStorage.removeItem('aura_wealth_data');
+          state = JSON.parse(JSON.stringify(defaultState));
+        }
         setAuthUser(null);
         renderAll();
         checkGateway();
@@ -682,10 +681,26 @@ function quickLogExpense(amount, category, notes) {
 }
 
 function deleteExpense(id) {
+  const row = state.expenses.find(e => e.id === id);
+  if (row) {
+    const source = row.source || 'mtn_momo';
+    const amt = money(row.amount);
+
+    // Account-aware balance refund
+    if (source === 'mtn_momo' || source === 'mtn_momo_cash' || source === 'momo') state.settings.mtnMomoCash = money(state.settings.mtnMomoCash) + amt;
+    else if (source === 'telecel_cash') state.settings.telecelCash = money(state.settings.telecelCash) + amt;
+    else if (source === 'at_money' || source === 'at_money_cash') state.settings.atMoneyCash = money(state.settings.atMoneyCash) + amt;
+    else if (source === 'bank' || source === 'bank_cash') {
+      state.settings.bankCash = money(state.settings.bankCash) + amt;
+      state.settings.cashBalance = state.settings.bankCash;
+    }
+    else if (source === 'home_cash') state.settings.homeCash = money(state.settings.homeCash) + amt;
+  }
   state.expenses = state.expenses.filter(e => e.id !== id);
   saveToStorage();
+  loadSettingsUI();
   renderAll();
-  toast('Expense deleted', 'info');
+  toast('Expense deleted & balance restored', 'info');
   supaMirror('expenses', 'delete', { id });
 }
 
@@ -2800,7 +2815,7 @@ function bindEvents() {
     });
   }
 
-  // Expense Logger Button
+  // Expense Logger Button & Enter Key Handlers
   const addExpBtn = document.getElementById('addExpBtn');
   if (addExpBtn) {
     addExpBtn.addEventListener('click', () => {
@@ -2815,13 +2830,35 @@ function bindEvents() {
 
       if (!amount || amount <= 0) { toast('Please enter a valid amount', 'error'); return; }
 
-      const created_at = date ? new Date(date + 'T' + new Date().toTimeString().split(' ')[0]).toISOString() : new Date().toISOString();
+      let created_at;
+      if (date) {
+        const parts = date.split('-').map(Number);
+        const now = new Date();
+        const d = new Date(parts[0], parts[1] - 1, parts[2], now.getHours(), now.getMinutes(), now.getSeconds());
+        created_at = d.toISOString();
+      } else {
+        created_at = new Date().toISOString();
+      }
+
       addExpense({ category: state.selectedCat, amount, notes, source, expense_date: date, created_at });
 
       if (amountEl) amountEl.value = '';
       if (notesEl) notesEl.value = '';
       if (dateEl) dateEl.valueAsDate = new Date();
       if (amountEl) amountEl.focus();
+    });
+
+    const expAmtInput = document.getElementById('expAmount');
+    const expNotesInput = document.getElementById('expNotes');
+    [expAmtInput, expNotesInput].forEach(el => {
+      if (el) {
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            addExpBtn.click();
+          }
+        });
+      }
     });
   }
 
