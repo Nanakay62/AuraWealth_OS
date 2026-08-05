@@ -307,9 +307,10 @@
           <div class="card exp-form-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
               <div class="card-label">Log Transaction</div>
-              <div class="txn-segment-control">
-                <button class="txn-seg-btn active" id="segExpenseBtn" type="button">Expense</button>
-                <button class="txn-seg-btn" id="segIncomeBtn" type="button" onclick="openIncomeModal()">Income</button>
+              <div class="segment-toggle-container" id="txnSegmentControl" data-mode="expense">
+                <div class="segment-glider"></div>
+                <button class="segment-btn active" id="segExpenseBtn" type="button" onclick="setTxnMode('expense')">Expense</button>
+                <button class="segment-btn" id="segIncomeBtn" type="button" onclick="setTxnMode('income')">Income</button>
               </div>
             </div>
 
@@ -336,24 +337,24 @@
             
             <!-- One-Tap Quick Log Presets -->
             <div style="margin-bottom:16px;">
-              <div class="form-label" style="margin-bottom:6px;">One-Tap Quick Expense Presets:</div>
-              <div class="quick-preset-row">
-                <button class="quick-preset-btn" onclick="quickLogExpense(10, 'transport', 'Tro-tro / Bus')">+ GH₵10 Transport</button>
-                <button class="quick-preset-btn" onclick="quickLogExpense(25, 'food', 'Lunch')">+ GH₵25 Lunch</button>
-                <button class="quick-preset-btn" onclick="quickLogExpense(50, 'shopping', 'Groceries')">+ GH₵50 Groceries</button>
-                <button class="quick-preset-btn" onclick="quickLogExpense(15, 'data_airtime', 'Data / Airtime')">+ GH₵15 Data & Airtime</button>
+              <div class="form-label" id="presetLabel" style="margin-bottom:6px;">One-Tap Quick Presets:</div>
+              <div class="quick-preset-row" id="quickPresetRow">
+                <button class="quick-preset-btn" type="button" onclick="prefillPreset(10, 'transport', 'Tro-tro / Bus')">+ GH₵10 Transport</button>
+                <button class="quick-preset-btn" type="button" onclick="prefillPreset(25, 'food', 'Lunch')">+ GH₵25 Lunch</button>
+                <button class="quick-preset-btn" type="button" onclick="prefillPreset(50, 'shopping', 'Groceries')">+ GH₵50 Groceries</button>
+                <button class="quick-preset-btn" type="button" onclick="prefillPreset(15, 'data_airtime', 'Data / Airtime')">+ GH₵15 Data & Airtime</button>
               </div>
             </div>
 
             <!-- Form Layout with Hero Input & Side-by-Side Payment Source and Date -->
             <div class="form-group" style="margin-bottom:14px;">
-              <label class="form-label">Expense Amount (GH₵)</label>
+              <label class="form-label" id="amountLabel">Expense Amount (GH₵)</label>
               <input type="number" class="form-input hero-exp-input" id="expAmount" placeholder="0.00" step="0.01" min="0">
             </div>
 
             <div class="form-row-2col" style="margin-bottom:14px;">
               <div class="form-group" style="flex:1; min-width:0;">
-                <label class="form-label">Payment Source</label>
+                <label class="form-label" id="sourceLabel">Payment Source</label>
                 <select class="form-input" id="expSource">
                   <option value="bank_cash">Bank Account (Savings)</option>
                   <option value="mtn_momo_cash" selected>MTN Mobile Money</option>
@@ -837,59 +838,7 @@
     </div>
   </div>
 
-  <!-- Income Modal -->
-  <div class="modal-overlay" id="incomeModalOverlay">
-    <div class="modal" style="max-width:440px;">
-      <div class="modal-header">
-        <div class="modal-title">Log Income</div>
-        <button class="modal-close" id="incomeModalClose"></button>
-      </div>
-      <form id="incomeForm">
-        <div class="form-group" style="margin-bottom:12px;">
-          <label class="form-label">Income Category</label>
-          <select class="form-input" id="incCategory" onchange="onIncCategoryChange(this.value)" required>
-            <option value="salary">Salary / Paycheck</option>
-            <option value="savings">Savings</option>
-            <option value="dividends">Stock Dividends</option>
-            <option value="tbill_yield">T-Bill Interest / Yield</option>
-            <option value="business">Business / Side-Hustle</option>
-            <option value="gift">Gift / Bonus</option>
-            <option value="misc">Misc Income</option>
-            <option value="custom">+ Type Custom Category...</option>
-          </select>
-        </div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <label class="form-label">Destination Account</label>
-          <select class="form-input" id="incDestAccount">
-            <option value="bank_cash">Bank Account (Savings)</option>
-            <option value="mtn_momo_cash">MTN Mobile Money</option>
-            <option value="telecel_cash">Telecel Cash</option>
-            <option value="at_money_cash">AT Money (AirtelTigo)</option>
-            <option value="home_cash">Physical Home Cash</option>
-          </select>
-        </div>
-        <div class="form-group" id="customIncCategoryContainer" style="display:none; margin-bottom:12px;">
-          <label class="form-label">Custom Category Name</label>
-          <input type="text" class="form-input" id="customIncCategory" placeholder="e.g. Freelance Consulting">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Amount (GH₵)</label>
-            <input type="number" class="form-input" id="incAmount" placeholder="2500.00" step="0.01" min="0" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Date</label>
-            <input type="date" class="form-input" id="incDate">
-          </div>
-        </div>
-        <div class="form-group" style="margin-bottom:18px;">
-          <label class="form-label">Notes (optional)</label>
-          <input type="text" class="form-input" id="incNotes" placeholder="e.g. Dividend payout from MTNGH">
-        </div>
-        <button type="submit" class="btn btn-emerald" style="width:100%;">+ Save Income Entry</button>
-      </form>
-    </div>
-  </div>
+
 
   <!-- Initial App Gateway Modal -->
   <div class="modal-overlay" id="authGatewayModalOverlay">

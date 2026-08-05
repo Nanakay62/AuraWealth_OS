@@ -1548,31 +1548,70 @@ select.form-input, select {
   }
 }
 
-/* 2-Way Segment Control [ Expense | Income ] */
-.txn-segment-control {
-  display: flex !important;
-  background: rgba(0, 0, 0, 0.25) !important;
-  padding: 3px !important;
-  border-radius: 10px !important;
-  border: 1px solid var(--surface-border) !important;
-  gap: 2px !important;
+/* Liquid Glass Segment Toggle */
+.segment-toggle-container {
+  position: relative;
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  padding: 4px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-.txn-seg-btn {
-  padding: 6px 14px !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  border-radius: 8px !important;
-  border: none !important;
-  background: transparent !important;
-  color: var(--text-secondary) !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
+/* The sliding liquid glass pill backplate */
+.segment-glider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  height: calc(100% - 8px);
+  width: calc(50% - 4px);
+  border-radius: 26px;
+  background: rgba(255, 183, 3, 0.25);
+  border: 1px solid rgba(255, 183, 3, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  /* Fluid spring curve for Apple liquid feel */
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s ease, border-color 0.3s ease;
+  z-index: 1;
 }
 
-.txn-seg-btn.active {
-  background: var(--accent-yellow) !important;
+/* Glider position morph when Income is selected */
+.segment-toggle-container[data-mode="income"] .segment-glider {
+  transform: translateX(100%);
+  background: rgba(46, 196, 182, 0.25);
+  border-color: rgba(46, 196, 182, 0.4);
+}
+
+/* Individual Segment Buttons */
+.segment-btn {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.segment-btn.active {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+/* Dynamic Accent for Form Inputs in Income Mode */
+.exp-form-card[data-mode="income"] .hero-exp-input {
+  color: #2ec4b6 !important;
+}
+
+.exp-form-card[data-mode="income"] #addExpBtn {
+  background: #2ec4b6 !important;
   color: #000000 !important;
+  box-shadow: 0 4px 16px rgba(46, 196, 182, 0.3) !important;
 }
 
 /* Compact 2-Tile Mobile Summary Strip */
@@ -1649,5 +1688,80 @@ body:has(#view-expenses.active) .fab-add,
   max-width: 280px !important;
   line-height: 1.4 !important;
   color: var(--text-secondary) !important;
+}
+
+/* ============================================================
+   LIGHT MODE MICA MATERIAL AND CHIP CONTRAST REPAIR
+   ============================================================ */
+
+/* Translucent Frosted Acrylic Mica Depth for Light Mode Surfaces */
+[data-theme="light"] .card,
+[data-theme="light"] .exp-form-card,
+[data-theme="light"] .modal {
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Translucent Input Fields in Light Mode */
+[data-theme="light"] .form-input,
+[data-theme="light"] input.form-input,
+[data-theme="light"] select.form-input,
+[data-theme="light"] textarea.form-input {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #15161c !important;
+}
+
+[data-theme="light"] .form-input:focus {
+  background: rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Inactive Category Chips in Light Mode */
+[data-theme="light"] .cat-pill,
+[data-theme="light"] .chip,
+[data-theme="light"] .quick-preset-btn {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #2d3748 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Selected Category Chip High-Contrast Fix in Light Mode */
+[data-theme="light"] .chip.active,
+[data-theme="light"] .cat-pill.active {
+  color: #ffffff !important;
+  background: #1e293b !important;
+  border-color: #1e293b !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Light Mode Segment Toggle Glider & Dark Font Fix */
+[data-theme="light"] .segment-toggle-container {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .segment-btn {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .segment-btn.active {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="light"] .segment-glider {
+  background: #ffb703 !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+  box-shadow: 0 2px 10px rgba(255, 183, 3, 0.35) !important;
+}
+
+[data-theme="light"] .segment-toggle-container[data-mode="income"] .segment-glider {
+  background: #2ec4b6 !important;
+  border-color: rgba(46, 196, 182, 0.4) !important;
+  box-shadow: 0 2px 10px rgba(46, 196, 182, 0.35) !important;
 }
 

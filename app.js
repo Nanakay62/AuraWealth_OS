@@ -661,8 +661,115 @@ function addExpense(exp) {
   supaMirror('expenses', 'insert', row);
 }
 
+function prefillPreset(amount, category, notes) {
+  const amountEl = document.getElementById('expAmount');
+  const notesEl = document.getElementById('expNotes');
+
+  if (amountEl) {
+    amountEl.value = amount;
+    amountEl.focus();
+  }
+
+  if (notesEl && notes) {
+    notesEl.value = notes;
+  }
+
+  state.selectedCat = category;
+  const catPills = document.querySelectorAll('.cat-pill, .chip');
+  catPills.forEach(pill => {
+    if (pill.getAttribute('data-cat') === category) {
+      pill.classList.add('active');
+    } else {
+      pill.classList.remove('active');
+    }
+  });
+
+  toast(`Preset loaded: GH₵${amount} (${category})`, 'info');
+}
+
 function quickLogExpense(amount, category, notes) {
-  addExpense({ category, amount, notes, source: 'mtn_momo', expense_date: new Date().toISOString().split('T')[0] });
+  prefillPreset(amount, category, notes);
+}
+
+function quickLogIncome(amount, category, notes) {
+  prefillPreset(amount, category, notes);
+}
+
+function setTxnMode(mode) {
+  state.txnMode = mode;
+  const segControl = document.getElementById('txnSegmentControl');
+  const formCard = document.querySelector('.exp-form-card');
+  const segExpBtn = document.getElementById('segExpenseBtn');
+  const segIncBtn = document.getElementById('segIncomeBtn');
+  const catPills = document.getElementById('catPills');
+  const presetRow = document.getElementById('quickPresetRow');
+  const amountLabel = document.getElementById('amountLabel');
+  const sourceLabel = document.getElementById('sourceLabel');
+  const addBtn = document.getElementById('addExpBtn');
+
+  if (segControl) segControl.setAttribute('data-mode', mode);
+  if (formCard) formCard.setAttribute('data-mode', mode);
+
+  if (segExpBtn) segExpBtn.classList.toggle('active', mode === 'expense');
+  if (segIncBtn) segIncBtn.classList.toggle('active', mode === 'income');
+
+  if (mode === 'income') {
+    if (amountLabel) amountLabel.textContent = 'Income Amount (GH₵)';
+    if (sourceLabel) sourceLabel.textContent = 'Destination Account';
+    if (addBtn) {
+      addBtn.textContent = '+ Save Income Entry';
+      addBtn.style.background = '#2ec4b6';
+      addBtn.style.color = '#000000';
+    }
+
+    state.selectedCat = 'salary';
+    if (catPills) {
+      catPills.innerHTML = `
+        <button class="cat-pill active" data-cat="salary">Salary</button>
+        <button class="cat-pill" data-cat="freelance">Freelance</button>
+        <button class="cat-pill" data-cat="business">Business</button>
+        <button class="cat-pill" data-cat="refund">Refund</button>
+        <button class="cat-pill" data-cat="gift">Gift / Transfer In</button>
+      `;
+    }
+
+    if (presetRow) {
+      presetRow.innerHTML = `
+        <button class="quick-preset-btn" type="button" onclick="prefillPreset(2000, 'salary', 'Payday Salary')">+ GH₵2,000 Payday</button>
+        <button class="quick-preset-btn" type="button" onclick="prefillPreset(500, 'gift', 'MoMo Transfer In')">+ GH₵500 MoMo Transfer</button>
+        <button class="quick-preset-btn" type="button" onclick="prefillPreset(200, 'refund', 'Refund')">+ GH₵200 Refund</button>
+      `;
+    }
+  } else {
+    if (amountLabel) amountLabel.textContent = 'Expense Amount (GH₵)';
+    if (sourceLabel) sourceLabel.textContent = 'Payment Source';
+    if (addBtn) {
+      addBtn.textContent = '+ Add Expense';
+      addBtn.style.background = 'var(--accent-yellow)';
+      addBtn.style.color = '#000000';
+    }
+
+    state.selectedCat = 'food';
+    if (catPills) {
+      catPills.innerHTML = `
+        <button class="cat-pill active" data-cat="food">Food</button>
+        <button class="cat-pill" data-cat="transport">Transport</button>
+        <button class="cat-pill" data-cat="bills">Bills</button>
+        <button class="cat-pill" data-cat="shopping">Shopping</button>
+        <button class="cat-pill" data-cat="data_airtime">Data & Airtime</button>
+        <button class="cat-pill" data-cat="misc">Misc</button>
+      `;
+    }
+
+    if (presetRow) {
+      presetRow.innerHTML = `
+        <button class="quick-preset-btn" type="button" onclick="prefillPreset(10, 'transport', 'Tro-tro / Bus')">+ GH₵10 Transport</button>
+        <button class="quick-preset-btn" type="button" onclick="prefillPreset(25, 'food', 'Lunch')">+ GH₵25 Lunch</button>
+        <button class="quick-preset-btn" type="button" onclick="prefillPreset(50, 'shopping', 'Groceries')">+ GH₵50 Groceries</button>
+        <button class="quick-preset-btn" type="button" onclick="prefillPreset(15, 'data_airtime', 'Data / Airtime')">+ GH₵15 Data & Airtime</button>
+      `;
+    }
+  }
 }
 
 function deleteExpense(id) {
@@ -1419,18 +1526,8 @@ function onIncCategoryChange(val) {
 }
 
 function openIncomeModal() {
-  const modal = document.getElementById('incomeModalOverlay');
-  if (modal) {
-    modal.classList.add('active');
-    const catSelect = document.getElementById('incCategory');
-    const customContainer = document.getElementById('customIncCategoryContainer');
-    const customInput = document.getElementById('customIncCategory');
-    if (catSelect) catSelect.value = 'salary';
-    if (customContainer) customContainer.style.display = 'none';
-    if (customInput) customInput.value = '';
-    const dateInput = document.getElementById('incDate');
-    if (dateInput) dateInput.valueAsDate = new Date();
-  }
+  switchView('expenses');
+  setTxnMode('income');
 }
 
 function closeIncomeModal() {
@@ -3044,6 +3141,9 @@ function registerServiceWorker() {
 // Global Exposures
 window.deleteExpense = deleteExpense;
 window.quickLogExpense = quickLogExpense;
+window.quickLogIncome = quickLogIncome;
+window.prefillPreset = prefillPreset;
+window.setTxnMode = setTxnMode;
 window.deleteIncome = deleteIncome;
 window.deleteInvestment = deleteInvestment;
 window.updatePricePrompt = updatePricePrompt;
