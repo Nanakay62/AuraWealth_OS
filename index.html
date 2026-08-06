@@ -122,14 +122,24 @@
             <div class="card safe-spend-card" style="grid-column: 1 / -1;">
               <div class="safe-spend-header">
                 <div>
-                  <div class="card-label">Safe to Spend Today</div>
-                  <div class="safe-spend-amount" id="safeDailyAllowance">GH₵0.00 / day</div>
+                  <div class="card-label">REMAINING TODAY</div>
+                  <div class="safe-spend-amount" id="safeDailyAllowance">GH₵0.00 remaining</div>
                   <div id="safe-spend-limit" style="display:none;"></div>
                 </div>
                 <div style="text-align:right;">
-                  <div class="card-label">Spent Today</div>
-                  <div style="font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;" id="todaySpentBadge">GH₵0.00</div>
                   <div id="pacing-status-badge" class="pacing-badge on-track" style="margin-top:6px;">ON TRACK</div>
+                </div>
+              </div>
+
+              <!-- Sub-stat Row displaying Today's Limit and Spent Today side-by-side -->
+              <div style="display:flex; align-items:center; gap:20px; margin-top:12px; margin-bottom:12px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="card-label" style="font-size:11px;">Today's Limit:</span>
+                  <span id="todayLimitBadge" style="font-size:15px; font-weight:600; font-variant-numeric:tabular-nums;">GH₵0.00</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="card-label" style="font-size:11px;">Spent Today:</span>
+                  <span id="todaySpentBadge" style="font-size:15px; font-weight:600; font-variant-numeric:tabular-nums;">GH₵0.00</span>
                 </div>
               </div>
 

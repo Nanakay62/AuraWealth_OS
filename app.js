@@ -615,6 +615,33 @@ const getUsdHomeCashInGhs = () => {
 const getSpendableLiquidCash = () => getBankCash() + getMtnMomoCash() + getTelecelCash() + getAtMoneyCash() + getHomeCash() + getUsdHomeCashInGhs();
 const getTotalNetWorth = () => getSpendableLiquidCash() + getTBillTotal() + getGCBTotal() + getStockTotal();
 
+Object.defineProperty(state, 'vaults', {
+  get: () => ({
+    bank_cash: getBankCash(),
+    mtn_momo_cash: getMtnMomoCash(),
+    telecel_cash: getTelecelCash(),
+    at_money_cash: getAtMoneyCash(),
+    home_cash: getHomeCash(),
+    bank: getBankCash(),
+    momo: getMtnMomoCash(),
+    mtn_momo: getMtnMomoCash(),
+    at_money: getAtMoneyCash()
+  }),
+  configurable: true
+});
+
+function getVaultName(rawSource) {
+  const source = (rawSource === 'mtn_momo' || rawSource === 'momo') ? 'mtn_momo_cash' : (rawSource === 'bank') ? 'bank_cash' : (rawSource === 'at_money') ? 'at_money_cash' : rawSource;
+  const names = {
+    mtn_momo_cash: 'MTN Mobile Money',
+    telecel_cash: 'Telecel Cash',
+    at_money_cash: 'AT Money',
+    bank_cash: 'Bank Account',
+    home_cash: 'Physical Home Cash'
+  };
+  return names[source] || source;
+}
+
 function getNetWorth() {
   return state.netWorthMode === 'liquid' ? getSpendableLiquidCash() + getStockTotal() : getTotalNetWorth();
 }
@@ -673,8 +700,24 @@ function checkTargetAlert(inv) {
 // CRUD Operations (Expenses, Incomes & Internal Transfers)
 function addExpense(exp) {
   const rawSource = exp.source || 'mtn_momo_cash';
-  const source = (rawSource === 'mtn_momo' || rawSource === 'momo') ? 'mtn_momo_cash' : (rawSource === 'bank') ? 'bank_cash' : rawSource;
+  const source = (rawSource === 'mtn_momo' || rawSource === 'momo') ? 'mtn_momo_cash' : (rawSource === 'bank') ? 'bank_cash' : (rawSource === 'at_money') ? 'at_money_cash' : rawSource;
   const amt = money(exp.amount);
+
+  // Zero-Balance Vault Validation Guard
+  const currentBalance = state.vaults[source] !== undefined ? state.vaults[source] : (state.vaults[rawSource] !== undefined ? state.vaults[rawSource] : 0);
+  const sourceName = getVaultName(source);
+  const sourceEl = document.getElementById('expSource');
+
+  if (amt > currentBalance) {
+    toast(`Insufficient Funds: ${sourceName} has only ${fmt(currentBalance)}.`, 'error');
+    if (sourceEl) {
+      sourceEl.classList.add('input-error');
+      sourceEl.addEventListener('change', () => sourceEl.classList.remove('input-error'), { once: true });
+    }
+    if (!exp.allowOverdraft && !confirm(`Insufficient Funds: ${sourceName} has only ${fmt(currentBalance)}.\n\nWould you like to proceed anyway, or log a transfer first?`)) {
+      return;
+    }
+  }
 
   // Account-aware balance deduction
   if (source === 'mtn_momo' || source === 'mtn_momo_cash' || source === 'momo') state.settings.mtnMomoCash = Math.max(0, money(state.settings.mtnMomoCash) - amt);
@@ -1191,10 +1234,12 @@ function renderDashboard() {
   if (paydayLabelEl) paydayLabelEl.textContent = `Payday Countdown (${payday}th Cycle)`;
 
   // Dual-Limit Daily Spending Engine (Static Baseline Anchor + Dynamic Pacing)
-  const remainingBudget = Math.max(0, limit - paydayCycleExp);
-  const dynamicLimit = remainingBudget / Math.max(1, daysRemaining);
-  const staticTarget = limit / 30;
   const todaySpent = sumExp(getTodayExpenses());
+  const expensesBeforeToday = paydayCycleExp - todaySpent;
+  const remainingBudgetBeforeToday = Math.max(0, limit - expensesBeforeToday);
+  const todayStartingAllowance = limit > 0 ? (remainingBudgetBeforeToday / Math.max(1, daysRemaining)) : 0;
+  const safeToSpendRemaining = todayStartingAllowance - todaySpent;
+  const staticTarget = limit / 30;
 
   const safeAllowanceEl = document.getElementById('safeDailyAllowance');
   const safeSpendLimitEl = document.getElementById('safe-spend-limit');
@@ -1202,17 +1247,23 @@ function renderDashboard() {
   const staticDailyTargetAlias = document.getElementById('static-daily-target');
   const baselineSubtextEl = document.getElementById('baselineAnchorSubtext') || document.getElementById('baseline-target-subtext');
   const todaySpentBadgeEl = document.getElementById('todaySpentBadge');
+  const todayLimitBadgeEl = document.getElementById('todayLimitBadge') || document.getElementById('todayStartingAllowanceBadge');
   const pacingBadgeEl = document.getElementById('pacing-status-badge');
   const safeAllowanceStatusEl = document.getElementById('safeAllowanceStatus');
 
-  const formattedDynamic = `${fmt(dynamicLimit)} / day`;
+  const formattedRemaining = `${fmt(safeToSpendRemaining)} remaining`;
+  const formattedDynamic = `${fmt(todayStartingAllowance)} / day`;
   const formattedStatic = `${fmt(staticTarget)} / day`;
 
-  if (safeAllowanceEl) safeAllowanceEl.textContent = formattedDynamic;
+  if (safeAllowanceEl) {
+    safeAllowanceEl.textContent = formattedRemaining;
+    safeAllowanceEl.style.color = safeToSpendRemaining < 0 ? 'var(--rose)' : '';
+  }
   if (safeSpendLimitEl) safeSpendLimitEl.textContent = formattedDynamic;
   if (staticTargetEl) staticTargetEl.textContent = formattedStatic;
   if (staticDailyTargetAlias) staticDailyTargetAlias.textContent = formattedStatic;
   if (todaySpentBadgeEl) todaySpentBadgeEl.textContent = fmt(todaySpent);
+  if (todayLimitBadgeEl) todayLimitBadgeEl.textContent = fmt(todayStartingAllowance);
 
   if (baselineSubtextEl) {
     baselineSubtextEl.textContent = `Target: ${fmt(staticTarget)}/day across 30 days to hit ${fmt(limit)} budget.`;
@@ -1229,7 +1280,7 @@ function renderDashboard() {
     statusText = 'Payday Budget Exhausted';
     pacingClass = 'pacing-badge exhausted';
     statusColor = 'var(--rose)';
-  } else if (dynamicLimit < staticTarget) {
+  } else if (todayStartingAllowance < staticTarget) {
     pacingText = 'BEHIND PACE';
     statusText = 'Behind Pace';
     pacingClass = 'pacing-badge behind-pace';
@@ -1277,7 +1328,7 @@ function renderDashboard() {
     else fill.style.background = 'linear-gradient(90deg,#fb7185,#ef4444)';
   }
 
-  // Sparkline
+  // Sparkline with Interactive Day Bar Tooltips
   const miniChart = document.getElementById('miniChart');
   if (miniChart) {
     const chartHtml = [];
@@ -1287,15 +1338,87 @@ function renderDashboard() {
       const dayExp = state.expenses.filter(e => new Date(e.created_at).toDateString() === d.toDateString());
       maxVal = Math.max(maxVal, sumExp(dayExp));
     }
+    const staticTarget = limit > 0 ? (limit / 30) : 0;
     for (let i = 6; i >= 0; i--) {
       const d = new Date(Date.now() - i * 864e5);
       const dayExp = state.expenses.filter(e => new Date(e.created_at).toDateString() === d.toDateString());
       const total = sumExp(dayExp);
       const h = (total / maxVal) * 100;
       const isToday = d.toDateString() === new Date().toDateString();
-      chartHtml.push(`<div class="chart-bar"><div class="bar-fill" style="height:${Math.max(6, h)}%;${isToday ? 'background:linear-gradient(180deg,var(--gold),rgba(251,191,36,0.4));' : ''}"></div><div class="bar-label">${d.toLocaleDateString('en', { weekday: 'narrow' })}</div></div>`);
+      const dateStr = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const spentStr = `${fmt(total)} spent`;
+      const statusText = total === 0 ? 'No Spend' : (staticTarget > 0 && total > staticTarget ? 'Above Baseline' : 'On Track');
+      const payload = `${dateStr} - ${spentStr} (${statusText})`;
+      chartHtml.push(`<div class="chart-bar day-bar-item" data-date="${dateStr}" data-spent="${spentStr}" data-payload="${payload}"><div class="bar-fill" style="height:${Math.max(6, h)}%;${isToday ? 'background:linear-gradient(180deg,var(--gold),rgba(251,191,36,0.4));' : ''}"></div><div class="bar-label">${d.toLocaleDateString('en', { weekday: 'narrow' })}</div></div>`);
     }
     miniChart.innerHTML = chartHtml.join('');
+    setupDayBarTooltips(miniChart);
+  }
+}
+
+function setupDayBarTooltips(container) {
+  let tooltip = document.getElementById('dayBarTooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.id = 'dayBarTooltip';
+    tooltip.className = 'bar-tooltip';
+    document.body.appendChild(tooltip);
+  }
+
+  let activeBar = null;
+
+  function showTooltip(bar) {
+    const payload = bar.getAttribute('data-payload') || `${bar.getAttribute('data-date')} - ${bar.getAttribute('data-spent')}`;
+    tooltip.textContent = payload;
+    tooltip.classList.add('visible');
+    activeBar = bar;
+
+    const rect = bar.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    let top = window.scrollY + rect.top - tooltipRect.height - 8;
+    let left = window.scrollX + rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+
+    if (top < window.scrollY + 4) {
+      top = window.scrollY + rect.bottom + 8;
+    }
+    left = Math.max(8, Math.min(window.innerWidth - tooltipRect.width - 8, left));
+
+    tooltip.style.top = `${top}px`;
+    tooltip.style.left = `${left}px`;
+  }
+
+  function hideTooltip() {
+    tooltip.classList.remove('visible');
+    activeBar = null;
+  }
+
+  const bars = container.querySelectorAll('.day-bar-item, .chart-bar');
+  bars.forEach(bar => {
+    bar.addEventListener('mouseenter', () => showTooltip(bar));
+    bar.addEventListener('mouseleave', () => {
+      if (!bar.dataset.pinned) hideTooltip();
+    });
+    bar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isCurrentlyActive = activeBar === bar && bar.dataset.pinned === 'true';
+      bars.forEach(b => delete b.dataset.pinned);
+      if (isCurrentlyActive) {
+        hideTooltip();
+      } else {
+        bar.dataset.pinned = 'true';
+        showTooltip(bar);
+      }
+    });
+  });
+
+  if (!window._dayBarTooltipDismissBound) {
+    window._dayBarTooltipDismissBound = true;
+    document.addEventListener('click', (e) => {
+      if (tooltip && !e.target.closest('.day-bar-item') && !e.target.closest('.chart-bar')) {
+        tooltip.classList.remove('visible');
+        document.querySelectorAll('.day-bar-item, .chart-bar').forEach(b => delete b.dataset.pinned);
+      }
+    });
   }
 
   // Asset Totals
