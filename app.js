@@ -2375,6 +2375,151 @@ function exportPdf() {
   }
 }
 
+function initStatementDatePickers() {
+  const startEl = document.getElementById('statement-start-date');
+  const endEl = document.getElementById('statement-end-date');
+  const now = new Date();
+  if (startEl && !startEl.value) {
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    startEl.value = firstDay.toISOString().split('T')[0];
+  }
+  if (endEl && !endEl.value) {
+    endEl.value = now.toISOString().split('T')[0];
+  }
+}
+
+function exportExpenditureStatement() {
+  const startEl = document.getElementById('statement-start-date');
+  const endEl = document.getElementById('statement-end-date');
+
+  let startDate = startEl && startEl.value ? new Date(startEl.value + 'T00:00:00') : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  let endDate = endEl && endEl.value ? new Date(endEl.value + 'T23:59:59') : new Date();
+
+  if (isNaN(startDate.getTime())) startDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  if (isNaN(endDate.getTime())) endDate = new Date();
+
+  const expInRange = (state.expenses || []).filter(e => {
+    const d = new Date(e.expense_date || e.created_at);
+    return d >= startDate && d <= endDate;
+  });
+
+  const incInRange = (state.incomes || []).filter(i => {
+    const d = new Date(i.income_date || i.created_at);
+    return d >= startDate && d <= endDate;
+  });
+
+  const totalExpense = sumExp(expInRange);
+  const totalIncome = sumExp(incInRange);
+  const netCashFlow = totalIncome - totalExpense;
+
+  const ledger = [
+    ...incInRange.map(i => ({
+      date: i.income_date || i.created_at,
+      source: getVaultName(i.source || 'Income Vault'),
+      category: i.category || 'Income',
+      description: i.notes || 'Income deposit',
+      type: '+',
+      amount: money(i.amount)
+    })),
+    ...expInRange.map(e => ({
+      date: e.expense_date || e.created_at,
+      source: getVaultName(e.source || 'momo'),
+      category: e.category || 'Expense',
+      description: e.notes || 'Expense payout',
+      type: '-',
+      amount: money(e.amount)
+    }))
+  ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const holder = (state.user && state.user.email) ? state.user.email : 'Primary Account Holder';
+  const periodStr = `${fmtDate(startDate)} - ${fmtDate(endDate)}`;
+
+  const element = document.createElement('div');
+  element.style.padding = '24px';
+  element.style.fontFamily = "'IBM Plex Sans', -apple-system, sans-serif";
+  element.style.color = '#0f172a';
+  element.style.background = '#ffffff';
+
+  element.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #0f172a; padding-bottom:12px; margin-bottom:16px;">
+      <div>
+        <h1 style="margin:0; font-size:20px; font-weight:800; color:#0f172a; letter-spacing:-0.02em;">AURA WEALTH OS - ACCOUNT STATEMENT</h1>
+        <div style="font-size:12px; color:#64748b; margin-top:4px; font-weight:600; text-transform:uppercase;">Official Expenditure Statement</div>
+      </div>
+      <div style="text-align:right; font-size:12px; color:#475569;">
+        <div><strong>Account Holder:</strong> ${holder}</div>
+        <div><strong>Statement Period:</strong> ${periodStr}</div>
+        <div><strong>Generated:</strong> ${fmtDate(new Date())}</div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:20px;">
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+        <div style="font-size:10px; text-transform:uppercase; color:#64748b; font-weight:700;">Total Received</div>
+        <div style="font-size:18px; font-weight:700; color:#059669; margin-top:4px;">${fmt(totalIncome)}</div>
+      </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+        <div style="font-size:10px; text-transform:uppercase; color:#64748b; font-weight:700;">Total Spent</div>
+        <div style="font-size:18px; font-weight:700; color:#dc2626; margin-top:4px;">${fmt(totalExpense)}</div>
+      </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+        <div style="font-size:10px; text-transform:uppercase; color:#64748b; font-weight:700;">Net Change</div>
+        <div style="font-size:18px; font-weight:700; color:${netCashFlow >= 0 ? '#059669' : '#dc2626'}; margin-top:4px;">${fmt(netCashFlow)}</div>
+      </div>
+    </div>
+
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead>
+        <tr style="background:#f1f5f9; text-align:left;">
+          <th style="padding:8px; border:1px solid #cbd5e1; font-weight:700;">Date</th>
+          <th style="padding:8px; border:1px solid #cbd5e1; font-weight:700;">Source Vault</th>
+          <th style="padding:8px; border:1px solid #cbd5e1; font-weight:700;">Category</th>
+          <th style="padding:8px; border:1px solid #cbd5e1; font-weight:700;">Description</th>
+          <th style="padding:8px; border:1px solid #cbd5e1; font-weight:700; text-align:center;">Type</th>
+          <th style="padding:8px; border:1px solid #cbd5e1; font-weight:700; text-align:right;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${ledger.length === 0 ? `
+          <tr>
+            <td colspan="6" style="padding:16px; text-align:center; color:#64748b; border:1px solid #cbd5e1;">
+              No transactions recorded for the selected period (${periodStr}).
+            </td>
+          </tr>
+        ` : ledger.map(item => `
+          <tr style="border-bottom:1px solid #e2e8f0;">
+            <td style="padding:6px 8px; border:1px solid #e2e8f0;">${fmtDate(item.date)}</td>
+            <td style="padding:6px 8px; border:1px solid #e2e8f0;">${item.source}</td>
+            <td style="padding:6px 8px; border:1px solid #e2e8f0;">${item.category}</td>
+            <td style="padding:6px 8px; border:1px solid #e2e8f0;">${item.description}</td>
+            <td style="padding:6px 8px; border:1px solid #e2e8f0; text-align:center; font-weight:700; color:${item.type === '+' ? '#059669' : '#dc2626'};">${item.type}</td>
+            <td style="padding:6px 8px; border:1px solid #e2e8f0; text-align:right; font-weight:700; color:${item.type === '+' ? '#059669' : '#dc2626'};">${fmt(item.amount)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <div style="margin-top:24px; border-top:1px solid #cbd5e1; padding-top:10px; text-align:center; font-size:10px; color:#64748b;">
+      Statement generated from Aura Wealth OS. For official personal records and expenditure audit.
+    </div>
+  `;
+
+  if (typeof html2pdf !== 'undefined') {
+    const opt = {
+      margin: 0.4,
+      filename: `aura-expenditure-statement-${startEl && startEl.value ? startEl.value : 'start'}-to-${endEl && endEl.value ? endEl.value : 'end'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save().then(() => {
+      toast('Expenditure Statement PDF downloaded', 'success');
+    }).catch(() => window.print());
+  } else {
+    window.print();
+  }
+}
+
 // Fee Estimator Engine
 function calculateDefaultFee(amount) {
   const taxable = Math.max(0, money(amount) - 100);
@@ -2838,6 +2983,7 @@ function getSpendingBreakdown(year = new Date().getFullYear()) {
 }
 
 function renderReports(year = new Date().getFullYear()) {
+  initStatementDatePickers();
   const data = getSpendingBreakdown(year);
 
   const yearTotalEl = document.getElementById('reportYearTotal');
@@ -3243,9 +3389,14 @@ function bindEvents() {
   const loadSamp = document.getElementById('loadSampleBtn');
   const expCsv = document.getElementById('exportCsvBtn');
   const expPdf = document.getElementById('exportPdfBtn');
+  const expStmt = document.getElementById('export-statement-btn');
+  const expStmtQuick = document.getElementById('export-statement-btn-quick');
+
   if (loadSamp) loadSamp.addEventListener('click', () => { loadSampleData(true); renderAll(); });
   if (expCsv) expCsv.addEventListener('click', exportCsv);
   if (expPdf) expPdf.addEventListener('click', exportPdf);
+  if (expStmt) expStmt.addEventListener('click', exportExpenditureStatement);
+  if (expStmtQuick) expStmtQuick.addEventListener('click', exportExpenditureStatement);
 
   // Keyboard Shortcuts
   document.addEventListener('keydown', (e) => {
