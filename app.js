@@ -80,6 +80,7 @@ const defaultState = {
   expenses: [],
   incomes: [],
   transfers: [],
+  debts: [],
   investments: [],
   history: [],
   gseCache: GSE_STOCKS,
@@ -273,6 +274,17 @@ function loadFromStorage() {
   } else {
     state = JSON.parse(JSON.stringify(defaultState));
   }
+
+  // Load guest/user budget state to prevent overwrite during re-renders
+  const guestBudget = localStorage.getItem('aura_guest_budget');
+  const userBudget = localStorage.getItem('aura_user_budget');
+  const effectiveBudget = parseFloat((state.authUser || state.user) ? (userBudget || guestBudget) : (guestBudget || userBudget)) || 0;
+
+  if (effectiveBudget > 0 && (!state.settings.spendingLimit || state.settings.spendingLimit === 0)) {
+    state.settings.spendingLimit = effectiveBudget;
+  }
+  state.userConfig = state.userConfig || {};
+  state.userConfig.budget = state.settings.spendingLimit || effectiveBudget || 0;
 }
 
 async function syncProfileToSupabase() {
@@ -377,6 +389,7 @@ function initSupabase() {
   if (!window.supabase) return;
   try {
     supabaseClient = window.supabase.createClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_KEY);
+    if (window.auraSyncEngine) window.auraSyncEngine.setClient(supabaseClient);
 
     supabaseClient.auth.getSession().then(({ data }) => {
       if (data && data.session) {
@@ -406,8 +419,9 @@ function initSupabase() {
   }
 }
 
-function setAuthUser(user) {
+async function setAuthUser(user) {
   state.authUser = user;
+  state.user = user;
   const guestBanner = document.getElementById('guestBanner');
   const nameEl = document.getElementById('userName');
   const avatarEl = document.getElementById('userAvatar');
@@ -427,6 +441,11 @@ function setAuthUser(user) {
     if (setAccountName) setAccountName.textContent = user.email || displayName;
     if (setAccountStatus) setAccountStatus.textContent = 'Authenticated & Syncing via Supabase RLS';
     if (signOutBtn) signOutBtn.style.display = 'block';
+
+    if (window.auraSyncEngine && window.auraSyncEngine.performTimestampSync) {
+      await window.auraSyncEngine.performTimestampSync(user.id, state, saveToStorage);
+    }
+    renderAll();
   } else {
     if (guestBanner) guestBanner.style.display = 'flex';
     if (nameEl) nameEl.textContent = 'Guest';
@@ -581,7 +600,7 @@ async function syncGsePrices() {
   const picker = document.getElementById('stock-picker') || document.getElementById('inv-stock-select');
   if (picker) {
     const currentVal = picker.value;
-    const stockOptions = state.gseCache.map(s => `<option value="${s.ticker}">${s.ticker} — ${s.name} (₵${s.price.toFixed(2)})</option>`).join('');
+    const stockOptions = state.gseCache.map(s => `<option value="${s.ticker}">${s.ticker} - ${s.name} (₵${s.price.toFixed(2)})</option>`).join('');
     picker.innerHTML = stockOptions + `<option value="CUSTOM">+ Add Custom / Unlisted Stock</option>`;
     picker.value = currentVal;
   }
@@ -1142,7 +1161,7 @@ function renderDashboard() {
   const liquid = getSpendableLiquidCash();
   const locked = getLockedTotal();
 
-  const nwVal = document.getElementById('netWorthValue');
+  const nwVal = document.getElementById('net-worth-val') || document.getElementById('netWorthValue');
   const nwSec = document.getElementById('netWorthSecondary');
   const liqCash = document.getElementById('liquidCash');
   const lockInv = document.getElementById('lockedInv');
@@ -1241,7 +1260,7 @@ function renderDashboard() {
   const safeToSpendRemaining = todayStartingAllowance - todaySpent;
   const staticTarget = limit / 30;
 
-  const safeAllowanceEl = document.getElementById('safeDailyAllowance');
+  const safeAllowanceEl = document.getElementById('remaining-today-val') || document.getElementById('safeDailyAllowance');
   const safeSpendLimitEl = document.getElementById('safe-spend-limit');
   const staticTargetEl = document.getElementById('staticDailyTarget');
   const staticDailyTargetAlias = document.getElementById('static-daily-target');
@@ -1905,9 +1924,7 @@ function switchView(view) {
   }
 }
 
-function switchTab(view) {
-  switchView(view);
-}
+
 
 function openMoreMenuModal() {
   const modal = document.getElementById('moreMenuModalOverlay');
@@ -1945,32 +1962,57 @@ function closeModal() {
   if (modal) modal.classList.remove('active');
 }
 
+function closeActiveModals() {
+  closeModal();
+  closeAuthModal();
+  closeIncomeModal();
+  closeTransferModal();
+  const modals = document.querySelectorAll('.modal-overlay, .modal-backdrop, #modalOverlay, #authModalOverlay, #incomeModalOverlay, #transferModalOverlay, #onboardingModalOverlay, #payAllocationModalOverlay');
+  modals.forEach(m => {
+    m.classList.remove('active');
+    if (m.style.display === 'flex' || m.style.display === 'block') {
+      m.style.display = 'none';
+    }
+  });
+}
+
+function switchTab(tabId) {
+  if (!tabId) return;
+  const mainViews = ['dashboard', 'accounts', 'investments', 'expenses', 'debts', 'reports', 'settings'];
+  if (mainViews.includes(tabId)) {
+    switchView(tabId);
+    return;
+  }
+  const tabs = document.querySelectorAll('.tab[data-tab]');
+  const contents = document.querySelectorAll('.tab-content');
+  tabs.forEach(t => {
+    if (t.dataset.tab === tabId) t.classList.add('active');
+    else t.classList.remove('active');
+  });
+  contents.forEach(c => {
+    if (c.id === `tab-${tabId}`) c.classList.add('active');
+    else c.classList.remove('active');
+  });
+  state.currentTab = tabId;
+}
+
+function quickFillExpense(amount, category) {
+  prefillPreset(amount, category || 'food');
+}
+
 function openAuthModal() {
-  const authModal = document.getElementById('authModalOverlay');
-  if (authModal) authModal.classList.add('active');
+  const authModal = document.getElementById('authModalOverlay') || document.getElementById('authModal');
+  if (authModal) {
+    authModal.classList.add('active');
+    authModal.style.display = 'flex';
+  }
 }
 
 function closeAuthModal() {
-  const authModal = document.getElementById('authModalOverlay');
-  if (authModal) authModal.classList.remove('active');
-}
-
-function openIncomeModal() {
-  const modal = document.getElementById('incomeModalOverlay');
-  if (modal) modal.classList.add('active');
-}
-
-function closeIncomeModal() {
-  const modal = document.getElementById('incomeModalOverlay');
-  if (modal) modal.classList.remove('active');
-}
-
-function checkOnboarding() {
-  const modal = document.getElementById('onboardingModalOverlay');
-  if (!state.hasOnboarded && modal) {
-    modal.classList.add('active');
-  } else if (modal) {
-    modal.classList.remove('active');
+  const authModal = document.getElementById('authModalOverlay') || document.getElementById('authModal');
+  if (authModal) {
+    authModal.classList.remove('active');
+    authModal.style.display = 'none';
   }
 }
 
@@ -2015,7 +2057,7 @@ function renderInvForm() {
       </div>
     `;
   } else {
-    const stockOptions = state.gseCache.map(s => `<option value="${s.ticker}">${s.ticker} — ${s.name} (₵${s.price.toFixed(2)})</option>`).join('');
+    const stockOptions = state.gseCache.map(s => `<option value="${s.ticker}">${s.ticker} - ${s.name} (₵${s.price.toFixed(2)})</option>`).join('');
 
     fields = `
       <div class="form-group" style="margin-bottom:12px;">
@@ -2073,7 +2115,7 @@ function renderInvForm() {
         </div>
       </div>
       <div class="form-group" style="margin-bottom:20px;">
-        <label class="form-label">Target Trigger Price (GH₵) — optional</label>
+        <label class="form-label">Target Trigger Price (GH₵) - optional</label>
         <input type="number" class="form-input" id="inv-targetprice" placeholder="1.00" step="0.01" min="0">
       </div>
     `;
@@ -2138,7 +2180,7 @@ function saveInvestment() {
         return;
       }
 
-      name = company ? `${ticker ? ticker + ' — ' : ''}${company}` : ticker;
+      name = company ? `${ticker ? ticker + ' - ' : ''}${company}` : ticker;
       const customPriceVal = customPriceInput && customPriceInput.value ? parseFloat(customPriceInput.value) : NaN;
       buyPrice = buypriceInput && buypriceInput.value ? parseFloat(buypriceInput.value) : (isNaN(customPriceVal) ? 0 : customPriceVal);
       currentPrice = !isNaN(customPriceVal) ? customPriceVal : buyPrice;
@@ -3039,26 +3081,40 @@ function bindEvents() {
     const target = e.target;
     if (!target) return;
 
-    // 1. Close Active Modals (Close buttons or Backdrop click)
-    const closeBtn = target.closest('.modal-close, .modal-close-btn, #close-help-modal, #helpModalClose, [data-action="close-modal"]');
+    // 1. Navigation / Tab Clicks ([data-nav-target])
+    const navTargetBtn = target.closest('[data-nav-target]');
+    if (navTargetBtn) {
+      const targetTab = navTargetBtn.dataset.navTarget;
+      switchTab(targetTab);
+      return;
+    }
+
+    // 2. Sign Out Button (#sign-out-btn, #signOutBtn)
+    const signOutBtn = target.closest('#sign-out-btn, #signOutBtn, [data-action="sign-out"]');
+    if (signOutBtn) {
+      handleSignOut();
+      return;
+    }
+
+    // 3. Preset Expense Chips & Quick Presets (+GH₵10, +GH₵25)
+    const presetBtn = target.closest('.preset-chip, .quick-preset-btn');
+    if (presetBtn) {
+      const amount = presetBtn.dataset.amount || presetBtn.getAttribute('data-amount');
+      const category = presetBtn.dataset.category || presetBtn.getAttribute('data-cat') || 'food';
+      if (amount) {
+        quickFillExpense(amount, category);
+        return;
+      }
+    }
+
+    // 4. Modal Triggers & Close Buttons (.close-modal-btn, .modal-close)
+    const closeBtn = target.closest('.close-modal-btn, .modal-close, .modal-close-btn, #close-help-modal, #helpModalClose, [data-action="close-modal"], [data-modal-close]');
     if (closeBtn) {
-      closeModal();
-      closeIncomeModal();
-      closeAuthModal();
-      closeTransferModal();
-      closeEditBalanceModal();
-      closeHelpModal();
-      closeMoreMenuModal();
+      closeActiveModals();
       return;
     }
     if (target.classList.contains('modal-overlay') || target.classList.contains('backdrop-overlay') || target.classList.contains('slide-over-overlay') || target.id === 'helpModalOverlay' || target.id === 'help-modal') {
-      closeModal();
-      closeIncomeModal();
-      closeAuthModal();
-      closeTransferModal();
-      closeEditBalanceModal();
-      closeHelpModal();
-      closeMoreMenuModal();
+      closeActiveModals();
       return;
     }
 
@@ -3234,7 +3290,12 @@ function bindEvents() {
       if (!amount || amount <= 0) { toast('Please enter a valid amount', 'error'); return; }
 
       const created_at = date ? new Date(date + 'T' + new Date().toTimeString().split(' ')[0]).toISOString() : new Date().toISOString();
-      addExpense({ category: state.selectedCat, amount, notes, source, expense_date: date, created_at });
+
+      if (state.txnMode === 'income') {
+        addIncome({ category: state.selectedCat, amount, notes, dest: source, income_date: date, created_at });
+      } else {
+        addExpense({ category: state.selectedCat, amount, notes, source, expense_date: date, created_at });
+      }
 
       if (amountEl) amountEl.value = '';
       if (notesEl) notesEl.value = '';
@@ -3333,15 +3394,51 @@ function bindEvents() {
     });
   }
 
+async function handleSignOut() {
+  if (supabaseClient) {
+    try {
+      await supabaseClient.auth.signOut();
+    } catch (e) {
+      console.warn('Sign out error:', e);
+    }
+  }
+
+  // Reset state to empty slate
+  state = JSON.parse(JSON.stringify(defaultState));
+  state.authUser = null;
+  state.user = null;
+  state.userConfig = { budget: 0 };
+  state.expenses = [];
+  state.incomes = [];
+  state.transfers = [];
+  state.debts = [];
+  state.investments = [];
+  state.history = [];
+
+  // Clear local storage
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem('aura_user_budget');
+
+  // Update UI auth status
+  setAuthUser(null);
+
+  // Clear DOM UI containers immediately
+  const monthGrid = document.getElementById('reportsMonthGrid');
+  if (monthGrid) monthGrid.innerHTML = '';
+  const catGrid = document.getElementById('reportsCatGrid');
+  if (catGrid) catGrid.innerHTML = '';
+
+  renderAll();
+
+  // Show Auth Menu / Landing Modal
+  openAuthModal();
+
+  toast('Signed out and session purged', 'info');
+}
+
   const signOut = document.getElementById('signOutBtn');
   if (signOut) {
-    signOut.addEventListener('click', async () => {
-      if (supabaseClient) {
-        await supabaseClient.auth.signOut();
-        toast('Signed out', 'info');
-        closeAuthModal();
-      }
-    });
+    signOut.addEventListener('click', handleSignOut);
   }
 
   // Settings Form Save
@@ -3357,7 +3454,17 @@ function bindEvents() {
       const moInput = document.getElementById('setAllocMomo');
 
       if (salInput) state.settings.monthlySalary = parseFloat(salInput.value) || 0;
-      if (limInput) state.settings.spendingLimit = parseFloat(limInput.value) || 0;
+      if (limInput) {
+        const limVal = parseFloat(limInput.value) || 0;
+        state.settings.spendingLimit = limVal;
+        state.userConfig = state.userConfig || {};
+        state.userConfig.budget = limVal;
+        if (!state.user && !state.authUser) {
+          localStorage.setItem('aura_guest_budget', limVal.toString());
+        } else {
+          localStorage.setItem('aura_user_budget', limVal.toString());
+        }
+      }
       if (payInput) state.settings.paydayDay = parseInt(payInput.value) || 25;
       if (usdInput) state.settings.usdRate = parseFloat(usdInput.value) || 0.065;
       
@@ -3369,7 +3476,7 @@ function bindEvents() {
 
       saveToStorage();
       renderAll();
-      toast('Preferences saved', 'success');
+      toast('Settings saved', 'success');
     });
   }
 
