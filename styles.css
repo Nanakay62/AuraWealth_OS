@@ -1840,3 +1840,26 @@ body:has(#view-expenses.active) .fab-add,
   box-shadow: 0 2px 10px rgba(46, 196, 182, 0.35) !important;
 }
 
+/* Safe-Area Inset Support for PWA / Mobile Display */
+.mobile-nav, .bottom-nav {
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.fab-add, .fab {
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.guest-banner {
+  padding-top: calc(10px + env(safe-area-inset-top, 0px)) !important;
+}
+
+@media (max-width: 900px) {
+  .app-window {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .main {
+    padding-left: calc(14px + env(safe-area-inset-left, 0px));
+    padding-right: calc(14px + env(safe-area-inset-right, 0px));
+  }
+}
+
