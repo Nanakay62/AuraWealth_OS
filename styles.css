@@ -357,6 +357,34 @@ button, input, select { font: inherit; }
   75% { transform: translateX(4px); }
 }
 
+/* User Manual Guide Styling */
+.guide-intro {
+  font-size: 0.85rem;
+  color: var(--text-m);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.guide-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-list li {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-m);
+}
+
+.guide-list li strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
 /* Ambient Radial Tints for Investment & Income Cards */
 .asset-cards { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 20px; }
 .card-income, .asset-card.income {
