@@ -18,6 +18,7 @@
   window.supaMirror = async function (table, op, row) {
     if (op === 'delete' && row && row.id && supabaseClient) {
       try {
+        if (window._markRecentlyDeletedExternal) window._markRecentlyDeletedExternal(row.id);
         const { error } = await supabaseClient
           .from(table)
           .update({ deleted_at: new Date().toISOString() })
@@ -136,16 +137,29 @@
   // ------------------------------------------------------------
   const REALTIME_TABLES = ['expenses', 'incomes', 'investments', 'transfers', 'debts'];
 
+  // Short-lived, in-memory guard against out-of-order realtime events.
+  // If a delete's UPDATE event arrives before that row's own INSERT
+  // event (common when create -> delete happen within a second or two
+  // of each other), the late INSERT would otherwise resurrect it. We
+  // remember deleted ids for a short window and refuse to re-add them.
+  const _recentlyDeletedIds = new Set();
+  function _markRecentlyDeleted(id) {
+    _recentlyDeletedIds.add(id);
+    setTimeout(() => _recentlyDeletedIds.delete(id), 15000); // 15s window
+  }
+  window._markRecentlyDeletedExternal = _markRecentlyDeleted;
+
   function applyRealtimeChange(table, eventType, newRow, oldRow) {
     if (!Array.isArray(state[table])) return;
 
     if (eventType === 'INSERT') {
-      if (newRow.deleted_at) return;
+      if (newRow.deleted_at || _recentlyDeletedIds.has(newRow.id)) return;
       if (!state[table].some(item => item.id === newRow.id)) {
         state[table].unshift(newRow);
       }
     } else if (eventType === 'UPDATE') {
       if (newRow.deleted_at) {
+        _markRecentlyDeleted(newRow.id);
         state[table] = state[table].filter(item => item.id !== newRow.id);
       } else if (state[table].some(item => item.id === newRow.id)) {
         state[table] = state[table].map(item => item.id === newRow.id ? newRow : item);
@@ -153,6 +167,7 @@
         state[table].unshift(newRow);
       }
     } else if (eventType === 'DELETE') {
+      _markRecentlyDeleted(oldRow.id);
       state[table] = state[table].filter(item => item.id !== oldRow.id);
     }
 
