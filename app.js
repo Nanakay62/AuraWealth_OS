@@ -1055,10 +1055,12 @@ function executeTransferModal() {
 }
 
 function deleteTransfer(id) {
+  const removed = (state.transfers || []).find(t => t.id === id);
   state.transfers = (state.transfers || []).filter(t => t.id !== id);
   saveToStorage();
   renderAll();
   toast('Transfer log deleted', 'info');
+  if (removed) supaMirror('transfers', 'delete', removed);
 }
 
 function openEditBalanceModal(accType) {
