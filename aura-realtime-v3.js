@@ -1,11 +1,7 @@
 /* ============================================================
-   AURA WEALTH OS - REALTIME SYNC + SOFT DELETE ENGINE (v2, corrected)
+   AURA WEALTH OS - REALTIME SYNC + SOFT DELETE ENGINE (v3, corrected)
    Load AFTER app.js, supabase.js, aura-hardening-v2.js,
    aura-sync-fix.js, aura-sync-race-fix.js.
-
-   You can DELETE aura-delete-tombstone-fix.js once this is live -
-   deleted_at in the database is now the single source of truth,
-   so per-device localStorage tombstones are no longer needed.
    ============================================================ */
 
 (function () {
@@ -193,5 +189,5 @@
     return result;
   };
 
-  console.log('[Aura Realtime v2] Soft deletes + per-table realtime + purge-on-hydrate active.');
+  console.log('[Aura Realtime v3] Soft deletes + per-table realtime + purge-on-hydrate + username support active.');
 })();

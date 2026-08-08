@@ -156,12 +156,28 @@ function getDynamicGreeting(userName) {
 }
 
 function getUserDisplayName() {
+  if (state.settings && state.settings.username && state.settings.username.trim()) {
+    return state.settings.username.trim();
+  }
   if (!state.authUser) return 'Guest';
   const meta = state.authUser.user_metadata;
   if (meta && meta.full_name) return meta.full_name;
   if (meta && meta.name) return meta.name;
   if (state.authUser.email) return state.authUser.email.split('@')[0];
   return 'User';
+}
+
+function updateUsername(newName) {
+  const trimmed = (newName || '').trim();
+  if (!trimmed) {
+    toast('Username cannot be empty', 'error');
+    return;
+  }
+  state.settings.username = trimmed;
+  saveToStorage();
+  updateGreeting();
+  renderAll();
+  toast('Username updated', 'success');
 }
 
 function updateGreeting() {
@@ -293,6 +309,7 @@ async function syncProfileToSupabase() {
     const alloc = state.settings.payAllocation || { tbills: 500, savings: 300, momo: 1100 };
     const payload = {
       user_id: state.authUser.id,
+      username: state.settings.username || null,
       has_onboarded: state.hasOnboarded,
       monthly_salary: money(state.settings.monthlySalary),
       spending_limit: money(state.settings.spendingLimit),
@@ -2812,6 +2829,7 @@ function renderDebts() {
 
 // Settings UI Binding
 function loadSettingsUI() {
+  const setUsername = document.getElementById('username-input');
   const setSal = document.getElementById('setSalary');
   const setLim = document.getElementById('setLimit');
   const setPay = document.getElementById('setPayday');
@@ -2825,6 +2843,7 @@ function loadSettingsUI() {
 
   const alloc = state.settings.payAllocation || { tbills: 500, savings: 300, momo: 1100 };
 
+  if (setUsername) setUsername.value = state.settings.username || '';
   if (setSal) setSal.value = state.settings.monthlySalary || '';
   if (setLim) setLim.value = state.settings.spendingLimit || '';
   if (setPay) setPay.value = state.settings.paydayDay || 25;
@@ -3447,6 +3466,7 @@ async function handleSignOut() {
   const saveSet = document.getElementById('saveSettingsBtn');
   if (saveSet) {
     saveSet.addEventListener('click', () => {
+      const userInput = document.getElementById('username-input');
       const salInput = document.getElementById('setSalary');
       const limInput = document.getElementById('setLimit');
       const payInput = document.getElementById('setPayday');
@@ -3455,6 +3475,10 @@ async function handleSignOut() {
       const saInput = document.getElementById('setAllocSavings');
       const moInput = document.getElementById('setAllocMomo');
 
+      if (userInput && userInput.value.trim()) {
+        state.settings.username = userInput.value.trim();
+        updateGreeting();
+      }
       if (salInput) state.settings.monthlySalary = parseFloat(salInput.value) || 0;
       if (limInput) {
         const limVal = parseFloat(limInput.value) || 0;
@@ -3612,6 +3636,7 @@ window.closeRepayDebtModal = closeRepayDebtModal;
 window.executeRepayDebt = executeRepayDebt;
 window.deleteDebt = deleteDebt;
 window.renderDebts = renderDebts;
+window.updateUsername = updateUsername;
 
 // Safe Initialization with Individual Try...Catch Safeguards
 function init() {
