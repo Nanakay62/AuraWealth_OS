@@ -2390,7 +2390,7 @@ function exportCsv() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', `aura-wealth-export-${new Date().toISOString().split('T')[0]}.csv`);
+  link.setAttribute('download', `dycson-economicos-export-${new Date().toISOString().split('T')[0]}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -2438,9 +2438,9 @@ function exportPdf() {
   element.innerHTML = `
     <div style="border-bottom: 2px solid #0f172a; padding-bottom: 18px; margin-bottom: 24px; display:flex; justify-content:space-between; align-items:flex-end;">
       <div>
-        <h1 style="margin:0; font-size:24px; font-weight:800; color:#0f172a; letter-spacing:-0.02em;">AURA ECONOMICS</h1>
+        <h1 style="margin:0; font-size:24px; font-weight:800; color:#0f172a; letter-spacing:-0.02em;">DYCSON ECONOMICOS</h1>
         <div style="font-size:13px; color:#0f172a; margin-top:4px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">VERIFIED STATEMENT OF ASSETS</div>
-        <div style="font-size:11px; color:#64748b; margin-top:3px; font-style:italic;">Engineered via DycsonEconsOS Core</div>
+        <div style="font-size:11px; color:#64748b; margin-top:3px; font-style:italic;">Engineered via Dycson EconomicOS Core</div>
       </div>
       <div style="text-align:right; font-size:12px; color:#475569;">
         <div><strong>Account Holder:</strong> ${userEmail}</div>
@@ -2527,14 +2527,14 @@ function exportPdf() {
     </table>
 
     <div style="margin-top:40px; border-top:1px solid #cbd5e1; padding-top:14px; text-align:center; font-size:11px; color:#64748b;">
-      Self-reported financial statement compiled via Aura Economics (DycsonEconsOS Core) for proof of funds verification.
+      Self-reported financial statement compiled via Dycson EconomicOS Core for proof of funds verification.
     </div>
   `;
 
   if (typeof html2pdf !== 'undefined') {
     const opt = {
       margin: 0.4,
-      filename: `aura-wealth-proof-statement-${new Date().toISOString().split('T')[0]}.pdf`,
+      filename: `dycson-proof-statement-${new Date().toISOString().split('T')[0]}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, logging: false },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -2615,7 +2615,7 @@ function exportExpenditureStatement() {
   element.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #0f172a; padding-bottom:12px; margin-bottom:16px;">
       <div>
-        <h1 style="margin:0; font-size:20px; font-weight:800; color:#0f172a; letter-spacing:-0.02em;">AURA WEALTH OS - ACCOUNT STATEMENT</h1>
+        <h1 style="margin:0; font-size:20px; font-weight:800; color:#0f172a; letter-spacing:-0.02em;">DYCSON ECONOMICOS - ACCOUNT STATEMENT</h1>
         <div style="font-size:12px; color:#64748b; margin-top:4px; font-weight:600; text-transform:uppercase;">Official Expenditure Statement</div>
       </div>
       <div style="text-align:right; font-size:12px; color:#475569;">
@@ -2672,14 +2672,14 @@ function exportExpenditureStatement() {
     </table>
 
     <div style="margin-top:24px; border-top:1px solid #cbd5e1; padding-top:10px; text-align:center; font-size:10px; color:#64748b;">
-      Statement generated from Aura Wealth OS. For official personal records and expenditure audit.
+      Statement generated from Dycson EconomicOS. For official personal records and expenditure audit.
     </div>
   `;
 
   if (typeof html2pdf !== 'undefined') {
     const opt = {
       margin: 0.4,
-      filename: `aura-expenditure-statement-${startEl && startEl.value ? startEl.value : 'start'}-to-${endEl && endEl.value ? endEl.value : 'end'}.pdf`,
+      filename: `dycson-expenditure-statement-${startEl && startEl.value ? startEl.value : 'start'}-to-${endEl && endEl.value ? endEl.value : 'end'}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, logging: false },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -3012,7 +3012,7 @@ async function triggerPwaInstall() {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
-      toast('Aura Wealth OS installed!', 'success');
+      toast('Dycson EconomicOS installed!', 'success');
       deferredPrompt = null;
     }
   } else {
@@ -3199,7 +3199,7 @@ function renderReports(year = new Date().getFullYear()) {
 
   if (yearTotalEl) yearTotalEl.textContent = fmt(data.yearTotal);
   if (monthlyAvgEl) monthlyAvgEl.textContent = fmt(data.monthlyAvg);
-  if (highestMonthEl) highestMonthEl.textContent = data.highestMonthAmt > 0 ? `${data.highestMonthName} (${fmt(data.highestMonthAmt)})` : '—';
+  if (highestMonthEl) highestMonthEl.textContent = data.highestMonthAmt > 0 ? `${data.highestMonthName} (${fmt(data.highestMonthAmt)})` : '-';
 
   // 12-Month Expense Grid
   const monthGrid = document.getElementById('reportsMonthGrid');

@@ -1,6 +1,6 @@
 {
-  "name": "Aura Wealth OS",
-  "short_name": "Aura",
+  "name": "Dycson EconomicOS",
+  "short_name": "Dycson OS",
   "description": "Multi-User Private Wealth & Payday Allowance PWA",
   "start_url": "./index.html",
   "display": "standalone",

@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#0f1117">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Aura">
+  <meta name="apple-mobile-web-app-title" content="Dycson OS">
 
   <!-- Primary Search Engine Tags -->
-  <title>Aura Wealth OS - Fast Multi-Wallet Budget & MoMo Expense Tracker</title>
-  <meta name="title" content="Aura Wealth OS - Fast Multi-Wallet Budget & MoMo Expense Tracker">
+  <title>Dycson EconomicOS | Know Your Worth. Budget Your Life.</title>
+  <meta name="title" content="Dycson EconomicOS | Know Your Worth. Budget Your Life.">
   <meta name="description" content="Track MTN Mobile Money, Telecel Cash, bank accounts, and daily spending in seconds. Features dynamic safe-to-spend allowances, payday countdowns, and offline-first privacy.">
   <meta name="keywords" content="budget tracker, momo expense tracker, safe to spend app, mobile money manager, personal finance ghana, offline budget app">
   <meta name="robots" content="index, follow">
@@ -19,14 +19,14 @@
   <!-- Open Graph / Facebook / WhatsApp Preview Tags -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://your-app-name.vercel.app/">
-  <meta property="og:title" content="Aura Wealth OS - Fast Multi-Wallet Budget Tracker">
+  <meta property="og:title" content="Dycson EconomicOS | Know Your Worth. Budget Your Life.">
   <meta property="og:description" content="Log expenses in 2 seconds. Multi-wallet tracking for MoMo, Cash, and Bank accounts with dynamic daily limits.">
   <meta property="og:image" content="https://your-app-name.vercel.app/og-image.png">
 
   <!-- Twitter Card Tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://your-app-name.vercel.app/">
-  <meta name="twitter:title" content="Aura Wealth OS - Fast Multi-Wallet Budget Tracker">
+  <meta name="twitter:title" content="Dycson EconomicOS | Know Your Worth. Budget Your Life.">
   <meta name="twitter:description" content="Log expenses in 2 seconds. Multi-wallet tracking for MoMo, Cash, and Bank accounts with dynamic daily limits.">
 
   <!-- Schema.org Structured Data for Google Search -->
@@ -34,7 +34,7 @@
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "Aura Wealth OS",
+    "name": "Dycson EconomicOS",
     "operatingSystem": "All",
     "applicationCategory": "FinanceApplication",
     "offers": {
@@ -73,11 +73,11 @@
   <div class="app-window">
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">A</div>
+      <div class="brand-container flex items-center gap-3" style="display:flex; align-items:center; gap:12px; padding:12px 8px; margin-bottom:16px;">
+        <img src="assets/logo.png" alt="Dycson EconomicOS" class="h-9 w-auto" style="height:36px; width:auto; border-radius:6px;" />
         <div>
-          <div class="brand-name">Aura</div>
-          <div class="brand-sub">ECONOMICS OS</div>
+          <div class="font-bold text-lg leading-tight text-white" style="font-weight:700; font-size:16px; line-height:1.25; color:#ffffff;">Dycson <span class="text-emerald-500" style="color:var(--emerald, #10b981);">EconomicOS</span></div>
+          <div class="text-xs text-slate-400" style="font-size:11px; color:var(--text-m, #94a3b8); margin-top:2px;">Know Your Worth. Budget Your Life.</div>
         </div>
       </div>
       <nav class="nav">
@@ -99,7 +99,7 @@
           </div>
         </div>
         <div style="font-size: 10px; color: var(--text-d); margin-top: 14px; text-align: center; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.5;">
-          <div>Aura v2.0 • Powered by DycsonEconsOS</div>
+          <div>Dycson EconomicOS v2.0</div>
           <div style="margin-top: 2px;">Made by Nana Kwame Dickson</div>
         </div>
       </div>
@@ -304,7 +304,7 @@
               </div>
               <div class="progress-meta">
                 <span id="progressPct">0% used</span>
-                <span id="daysLeft">— days left until payday</span>
+                <span id="daysLeft">- days left until payday</span>
               </div>
               <div class="mini-chart" id="miniChart"></div>
             </div>
@@ -580,7 +580,7 @@
             </div>
           </div>
           <div style="font-size:12px; color:var(--text-d); margin-bottom:14px; display:flex; justify-content:flex-end;">
-            <span>Stock prices as of: <strong id="pricesAsOf">—</strong></span>
+            <span>Stock prices as of: <strong id="pricesAsOf">-</strong></span>
           </div>
 
           <div class="tab-content active" id="tab-fixed">
@@ -653,7 +653,7 @@
               </div>
               <div>
                 <div class="metric-label">Highest Spending Month</div>
-                <div style="font-size:20px; font-weight:600; color:var(--indigo);" id="reportHighestMonth">—</div>
+                <div style="font-size:20px; font-weight:600; color:var(--indigo);" id="reportHighestMonth">-</div>
               </div>
             </div>
           </div>
@@ -758,7 +758,7 @@
             <!-- Native PWA App Installation -->
             <div class="card" style="margin-bottom:18px;">
               <div class="card-label" style="margin-bottom:12px;">App Installation</div>
-              <p style="font-size:13px; color:var(--text-m); margin-bottom:14px; line-height:1.5;">Install Aura Wealth OS directly onto your home screen for quick 1-tap launch and full offline access.</p>
+              <p style="font-size:13px; color:var(--text-m); margin-bottom:14px; line-height:1.5;">Install Dycson EconomicOS directly onto your home screen for quick 1-tap launch and full offline access.</p>
               <button class="btn btn-emerald" id="pwa-install-btn" onclick="triggerPwaInstall()">Install App on Device</button>
               <div style="font-size:11px; color:var(--text-d); margin-top:10px;">
                 * On iOS Safari, tap the <strong>Share</strong> icon and select <strong>'Add to Home Screen'</strong>.
@@ -795,7 +795,7 @@
 
             <!-- Whole-Project Simple User Guide (Easy Manual) in Settings Tab -->
             <section id="user-guide-section" class="mica-card settings-group card" style="margin-bottom:18px;">
-              <div class="card-label" style="margin-bottom:14px;">Complete Aura User Guide (User Manual)</div>
+              <div class="card-label" style="margin-bottom:14px;">Complete Dycson EconomicOS User Guide (User Manual)</div>
               
               <details class="mica-accordion help-accordion" style="margin-bottom:10px;" open>
                 <summary>1. 🎛️ Dashboard (Your Money Home Screen)</summary>
@@ -963,8 +963,8 @@
   <div class="modal-overlay" id="authGatewayModalOverlay">
     <div class="modal" id="auth-gateway-modal" style="max-width:440px; text-align:center; padding:32px 28px;">
       <div style="margin-bottom:24px;">
-        <div class="brand-mark" style="margin:0 auto 14px; width:52px; height:52px; font-size:26px;">A</div>
-        <div style="font-family:'Fraunces',serif; font-size:26px; font-weight:600; letter-spacing:-0.02em;">Welcome to Aura Wealth OS</div>
+        <img src="assets/logo.png" alt="Dycson EconomicOS" style="margin:0 auto 14px; height:48px; width:auto;" />
+        <div style="font-family:'Fraunces',serif; font-size:26px; font-weight:600; letter-spacing:-0.02em;">Welcome to Dycson EconomicOS</div>
         <div style="font-size:14px; color:var(--text-m); margin-top:8px;">Select how you would like to proceed:</div>
       </div>
       <div style="display:flex; flex-direction:column; gap:12px;">
@@ -978,7 +978,7 @@
   <div class="modal-overlay" id="onboardingModalOverlay">
     <div class="modal" id="onboarding-modal" style="max-width:440px;">
       <div style="text-align:center; margin-bottom:20px;">
-        <div class="brand-mark" style="margin:0 auto 12px; width:48px; height:48px; font-size:24px;">A</div>
+        <img src="assets/logo.png" alt="Dycson EconomicOS" style="margin:0 auto 12px; height:44px; width:auto;" />
         <div style="font-family:'Fraunces',serif; font-size:24px; font-weight:600;">Set Up Baseline</div>
         <div style="font-size:13px; color:var(--text-m); margin-top:4px;">Set up your baseline in 10 seconds</div>
       </div>
@@ -1203,7 +1203,7 @@
     <div class="slide-over-drawer" id="help-modal">
       <div class="slide-over-content">
         <div class="help-drawer-header">
-          <div class="help-drawer-title">Aura Quick Guide</div>
+          <div class="help-drawer-title">Dycson EconomicOS Quick Guide</div>
           <button class="modal-close" id="helpModalClose" onclick="window.closeHelpModal()">✕</button>
         </div>
         <div class="help-drawer-body">
