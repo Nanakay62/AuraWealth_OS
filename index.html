@@ -1247,6 +1247,21 @@
     </div>
   </div>
 
+  <!-- Transaction List Item Template -->
+  <template id="transactionItemTemplate">
+    <div class="exp-item" data-id="${item.id}">
+      <div class="exp-icon"></div>
+      <div class="exp-info">
+        <div class="exp-cat"></div>
+        <div class="exp-notes"></div>
+        <div class="exp-time"></div>
+      </div>
+      <div class="exp-amt"></div>
+      <button class="edit-btn" data-action="edit-expense" data-id="${item.id}" title="Edit Expense">✏️</button>
+      <button class="del-btn" data-action="delete-expense" data-id="${item.id}" title="Delete Expense">🗑️</button>
+    </div>
+  </template>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 

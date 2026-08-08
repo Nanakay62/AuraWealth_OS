@@ -893,6 +893,114 @@ function deleteExpense(id) {
   supaMirror('expenses', 'delete', { id });
 }
 
+function editExpense(id) {
+  const item = state.expenses.find(e => e.id === id);
+  if (!item) return;
+
+  const formCard = document.querySelector('.exp-form-card');
+  const modal = document.getElementById('txnModal') || formCard;
+  if (modal) {
+    modal.dataset.editingId = id;
+    delete modal.dataset.editingType;
+  }
+
+  const amountEl = document.getElementById('expAmount');
+  const notesEl = document.getElementById('expNotes');
+  const dateEl = document.getElementById('expDate');
+  const sourceEl = document.getElementById('expSource');
+  const addBtn = document.getElementById('addExpBtn');
+
+  if (amountEl) amountEl.value = item.amount;
+  if (notesEl) notesEl.value = item.notes || '';
+  if (dateEl) {
+    const dVal = item.expense_date || (item.created_at ? item.created_at.split('T')[0] : '');
+    dateEl.value = dVal;
+  }
+  if (sourceEl) sourceEl.value = item.source || 'mtn_momo_cash';
+
+  setTxnMode('expense');
+
+  if (item.category) {
+    state.selectedCat = item.category;
+    document.querySelectorAll('#catPills .cat-pill').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.cat === item.category);
+    });
+  }
+
+  if (addBtn) {
+    addBtn.textContent = 'Update Expense';
+  }
+
+  switchView('expenses');
+  if (amountEl) amountEl.focus();
+}
+
+function editIncome(id) {
+  const item = state.incomes.find(i => i.id === id);
+  if (!item) return;
+
+  const formCard = document.querySelector('.exp-form-card');
+  const modal = document.getElementById('txnModal') || formCard;
+  if (modal) {
+    modal.dataset.editingId = id;
+    modal.dataset.editingType = 'income';
+  }
+
+  const amountEl = document.getElementById('expAmount');
+  const notesEl = document.getElementById('expNotes');
+  const dateEl = document.getElementById('expDate');
+  const sourceEl = document.getElementById('expSource');
+  const addBtn = document.getElementById('addExpBtn');
+
+  if (amountEl) amountEl.value = item.amount;
+  if (notesEl) notesEl.value = item.notes || '';
+  if (dateEl) {
+    const dVal = item.income_date || (item.created_at ? item.created_at.split('T')[0] : '');
+    dateEl.value = dVal;
+  }
+  if (sourceEl) sourceEl.value = item.dest || 'mtn_momo_cash';
+
+  setTxnMode('income');
+
+  if (item.category) {
+    state.selectedCat = item.category;
+    document.querySelectorAll('#catPills .cat-pill').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.cat === item.category);
+    });
+  }
+
+  if (addBtn) {
+    addBtn.textContent = 'Update Income Entry';
+  }
+
+  switchView('expenses');
+  if (amountEl) amountEl.focus();
+}
+
+function editDebt(id) {
+  const debt = state.debts.find(d => d.id === id);
+  if (!debt) return;
+
+  const modal = document.getElementById('debtModalOverlay');
+  const form = document.getElementById('debtForm');
+  if (modal) modal.dataset.editingId = id;
+  if (form) form.dataset.editingId = id;
+
+  const dirEl = document.getElementById('debtDirection');
+  const cpEl = document.getElementById('debtCounterparty');
+  const amtEl = document.getElementById('debtAmount');
+  const dueEl = document.getElementById('debtDueDate');
+  const notesEl = document.getElementById('debtNotes');
+
+  if (dirEl) dirEl.value = debt.direction;
+  if (cpEl) cpEl.value = debt.counterparty;
+  if (amtEl) amtEl.value = debt.amount;
+  if (dueEl) dueEl.value = debt.due_date || '';
+  if (notesEl) notesEl.value = debt.notes || '';
+
+  openAddDebtModal();
+}
+
 function addIncome(inc) {
   const rawDest = inc.dest || 'mtn_momo_cash';
   const dest = (rawDest === 'mtn_momo' || rawDest === 'momo') ? 'mtn_momo_cash' : (rawDest === 'bank') ? 'bank_cash' : rawDest;
@@ -1535,7 +1643,7 @@ function renderRecent() {
     const m = CAT_META[e.category] || CAT_META.misc;
     return `<div class="recent-item">
       <div class="recent-icon" style="background:${m.bg};color:${m.color}">${I[m.icon]}</div>
-      <div class="recent-info"><div class="recent-cat">${m.label}</div><div class="recent-notes">${e.notes || '—'}</div></div>
+      <div class="recent-info"><div class="recent-cat">${m.label}</div><div class="recent-notes">${e.notes || '-'}</div></div>
       <div class="recent-amt">${fmt(e.amount)}</div>
     </div>`;
   }).join('');
@@ -1652,10 +1760,11 @@ function renderExpenses() {
           <div class="exp-icon" style="background:${m.bg};color:${m.color}">${I[m.icon]}</div>
           <div class="exp-info">
             <div class="exp-cat">${m.label}</div>
-            <div class="exp-notes">${e.notes || '—'}</div>
+            <div class="exp-notes">${e.notes || '-'}</div>
             <div class="exp-time">${fmtTime(e.created_at)}</div>
           </div>
           <div class="exp-amt">${fmt(e.amount)}</div>
+          <button class="edit-btn" data-action="edit-expense" data-id="${e.id}" onclick="window.editExpense('${e.id}')" title="Edit Expense">✏️</button>
           <button class="del-btn" onclick="window.deleteExpense('${e.id}')">${I.trash}</button>
         </div>`;
       }).join('')}
@@ -1699,10 +1808,11 @@ function renderIncomes() {
           <div class="exp-icon" style="background:rgba(52,211,153,0.15);color:var(--emerald);">${I.income}</div>
           <div class="exp-info">
             <div class="exp-cat" style="color:var(--emerald);">${meta.label}</div>
-            <div class="exp-notes">${inc.notes || '—'}</div>
+            <div class="exp-notes">${inc.notes || '-'}</div>
             <div class="exp-time">${fmtTime(inc.created_at)}</div>
           </div>
           <div class="exp-amt" style="color:var(--emerald);">+ ${fmt(inc.amount)}</div>
+          <button class="edit-btn" data-action="edit-income" data-id="${inc.id}" onclick="window.editIncome('${inc.id}')" title="Edit Income">✏️</button>
           <button class="del-btn" onclick="window.deleteIncome('${inc.id}')">${I.trash}</button>
         </div>`;
       }).join('')}
@@ -2692,6 +2802,10 @@ function closeDebtModal() {
 }
 
 function saveDebt() {
+  const modal = document.getElementById('debtModalOverlay');
+  const form = document.getElementById('debtForm');
+  const editingId = (modal && modal.dataset.editingId) || (form && form.dataset.editingId);
+
   const direction = document.getElementById('debtDirection').value;
   const counterparty = document.getElementById('debtCounterparty').value.trim();
   const amount = parseFloat(document.getElementById('debtAmount').value) || 0;
@@ -2700,6 +2814,34 @@ function saveDebt() {
 
   if (!counterparty) { toast('Please enter counterparty name', 'error'); return; }
   if (amount <= 0) { toast('Please enter a valid debt amount', 'error'); return; }
+
+  if (editingId) {
+    const idx = state.debts.findIndex(d => d.id === editingId);
+    if (idx !== -1) {
+      state.debts[idx] = {
+        ...state.debts[idx],
+        direction,
+        counterparty,
+        amount,
+        due_date: dueDate,
+        notes,
+        updated_at: new Date().toISOString()
+      };
+      const updatedRow = state.debts[idx];
+      if (modal) delete modal.dataset.editingId;
+      if (form) delete form.dataset.editingId;
+      saveToStorage();
+      renderDebts();
+      closeDebtModal();
+      supaMirror('debts', 'update', updatedRow);
+      toast('Debt record updated', 'success');
+
+      document.getElementById('debtCounterparty').value = '';
+      document.getElementById('debtAmount').value = '';
+      document.getElementById('debtNotes').value = '';
+      return;
+    }
+  }
 
   const debt = {
     id: uuid(),
@@ -2813,6 +2955,7 @@ function renderDebts() {
           <div style="font-size:15px; font-weight:700; color:${isLent ? 'var(--emerald)' : 'var(--rose)'}">${fmt(remaining)}</div>
           <div style="display:flex; gap:6px; justify-content:flex-end; margin-top:4px;">
             ${d.status !== 'settled' ? `<button class="btn btn-ghost" style="font-size:10px; padding:3px 8px;" onclick="window.openRepayDebtModal('${d.id}')">Repay</button>` : ''}
+            <button class="btn btn-ghost edit-btn" style="font-size:10px; padding:3px 8px;" data-action="edit-debt" data-id="${d.id}" onclick="window.editDebt('${d.id}')" title="Edit Debt">✏️ Edit</button>
             <button class="btn btn-ghost" style="font-size:10px; padding:3px 8px; color:var(--rose);" onclick="window.deleteDebt('${d.id}')">Delete</button>
           </div>
         </div>
@@ -3189,6 +3332,26 @@ function bindEvents() {
       return;
     }
 
+    // Action: Edit Expense / Income / Debt
+    const editExpTarget = target.closest('[data-action="edit-expense"]');
+    if (editExpTarget) {
+      const id = editExpTarget.dataset.id || editExpTarget.getAttribute('data-id');
+      if (id) editExpense(id);
+      return;
+    }
+    const editIncTarget = target.closest('[data-action="edit-income"]');
+    if (editIncTarget) {
+      const id = editIncTarget.dataset.id || editIncTarget.getAttribute('data-id');
+      if (id) editIncome(id);
+      return;
+    }
+    const editDebtTarget = target.closest('[data-action="edit-debt"]');
+    if (editDebtTarget) {
+      const id = editDebtTarget.dataset.id || editDebtTarget.getAttribute('data-id');
+      if (id) editDebt(id);
+      return;
+    }
+
     // 3. Action: Add Expense / Quick Add
     const addExpBtn = target.closest('#quickAddBtn, #fabBtn, #add-expense-btn, [data-action="add-expense"]');
     if (addExpBtn) {
@@ -3300,6 +3463,11 @@ function bindEvents() {
   const addExpBtn = document.getElementById('addExpBtn');
   if (addExpBtn) {
     addExpBtn.addEventListener('click', () => {
+      const formCard = document.querySelector('.exp-form-card');
+      const modal = document.getElementById('txnModal') || formCard;
+      const editingId = modal ? modal.dataset.editingId : null;
+      const editingType = modal ? modal.dataset.editingType : null;
+
       const amountEl = document.getElementById('expAmount');
       const notesEl = document.getElementById('expNotes');
       const dateEl = document.getElementById('expDate');
@@ -3312,6 +3480,82 @@ function bindEvents() {
       if (!amount || amount <= 0) { toast('Please enter a valid amount', 'error'); return; }
 
       const created_at = date ? new Date(date + 'T' + new Date().toTimeString().split(' ')[0]).toISOString() : new Date().toISOString();
+
+      if (editingId) {
+        if (state.txnMode === 'income' || editingType === 'income') {
+          const idx = state.incomes.findIndex(i => i.id === editingId);
+          if (idx !== -1) {
+            const oldRow = state.incomes[idx];
+            const oldAmt = money(oldRow.amount);
+            const oldDest = oldRow.dest || 'mtn_momo_cash';
+
+            if (oldDest === 'bank' || oldDest === 'bank_cash') state.settings.bankCash = Math.max(0, money(state.settings.bankCash) - oldAmt);
+            else if (oldDest === 'mtn_momo' || oldDest === 'mtn_momo_cash' || oldDest === 'momo') state.settings.mtnMomoCash = Math.max(0, money(state.settings.mtnMomoCash) - oldAmt);
+            else if (oldDest === 'telecel_cash') state.settings.telecelCash = Math.max(0, money(state.settings.telecelCash) - oldAmt);
+            else if (oldDest === 'at_money' || oldDest === 'at_money_cash') state.settings.atMoneyCash = Math.max(0, money(state.settings.atMoneyCash) - oldAmt);
+            else if (oldDest === 'home_cash') state.settings.homeCash = Math.max(0, money(state.settings.homeCash) - oldAmt);
+
+            const dest = (source === 'mtn_momo' || source === 'momo') ? 'mtn_momo_cash' : (source === 'bank') ? 'bank_cash' : source;
+            if (dest === 'bank' || dest === 'bank_cash') state.settings.bankCash = money(state.settings.bankCash) + amount;
+            else if (dest === 'mtn_momo' || dest === 'mtn_momo_cash' || dest === 'momo') state.settings.mtnMomoCash = money(state.settings.mtnMomoCash) + amount;
+            else if (dest === 'telecel_cash') state.settings.telecelCash = money(state.settings.telecelCash) + amount;
+            else if (dest === 'at_money' || dest === 'at_money_cash') state.settings.atMoneyCash = money(state.settings.atMoneyCash) + amount;
+            else if (dest === 'home_cash') state.settings.homeCash = money(state.settings.homeCash) + amount;
+
+            state.incomes[idx] = {
+              ...state.incomes[idx],
+              category: state.selectedCat,
+              amount,
+              notes,
+              dest,
+              income_date: date,
+              created_at,
+              updated_at: new Date().toISOString()
+            };
+            const updatedRow = state.incomes[idx];
+            if (modal) {
+              delete modal.dataset.editingId;
+              delete modal.dataset.editingType;
+            }
+            saveToStorage();
+            loadSettingsUI();
+            renderAll();
+            supaMirror('incomes', 'update', updatedRow);
+            toast('Income entry updated', 'success');
+          }
+        } else {
+          const idx = state.expenses.findIndex(e => e.id === editingId);
+          if (idx !== -1) {
+            state.expenses[idx] = {
+              ...state.expenses[idx],
+              category: state.selectedCat,
+              amount,
+              notes,
+              source,
+              expense_date: date,
+              created_at,
+              updated_at: new Date().toISOString()
+            };
+            const updatedRow = state.expenses[idx];
+            if (modal) {
+              delete modal.dataset.editingId;
+              delete modal.dataset.editingType;
+            }
+            saveToStorage();
+            renderAll();
+            supaMirror('expenses', 'update', updatedRow);
+            toast('Expense updated', 'success');
+          }
+        }
+
+        if (amountEl) amountEl.value = '';
+        if (notesEl) notesEl.value = '';
+        if (dateEl) dateEl.valueAsDate = new Date();
+        if (addExpBtn) {
+          addExpBtn.textContent = state.txnMode === 'income' ? '+ Save Income Entry' : '+ Add Expense';
+        }
+        return;
+      }
 
       if (state.txnMode === 'income') {
         addIncome({ category: state.selectedCat, amount, notes, dest: source, income_date: date, created_at });
@@ -3582,6 +3826,9 @@ function registerServiceWorker() {
 
 // Global Exposures
 window.deleteExpense = deleteExpense;
+window.editExpense = editExpense;
+window.editIncome = editIncome;
+window.editDebt = editDebt;
 window.quickLogExpense = quickLogExpense;
 window.quickLogIncome = quickLogIncome;
 window.prefillPreset = prefillPreset;

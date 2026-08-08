@@ -544,8 +544,10 @@ select.form-input, select {
 .exp-time { font-size: 11px; color: var(--text-d); margin-top: 2px; }
 .exp-amt { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
 .del-btn { width: 32px; height: 32px; border-radius: 9999px; border: none; background: transparent; color: var(--text-d); cursor: pointer; display: grid; place-items: center; transition: all 0.2s var(--smooth); opacity: 0.8; }
-.exp-item:hover .del-btn, .inv-card:hover .del-btn { opacity: 1; }
+.edit-btn { width: 32px; height: 32px; border-radius: 9999px; border: none; background: transparent; color: var(--text-d); cursor: pointer; display: grid; place-items: center; transition: all 0.2s var(--smooth); opacity: 0.8; font-size: 13px; }
+.exp-item:hover .del-btn, .inv-card:hover .del-btn, .exp-item:hover .edit-btn, .inv-card:hover .edit-btn { opacity: 1; }
 .del-btn:hover { background: rgba(251,113,133,0.15); color: var(--rose); }
+.edit-btn:hover { background: rgba(96,165,250,0.15); color: var(--blue); }
 .del-btn svg { width: 15px; height: 15px; }
 
 /* Category Badges Refined */

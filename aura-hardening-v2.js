@@ -357,6 +357,7 @@ window.renderDebts = function renderDebts() {
           <div style="font-size:15px; font-weight:700; color:${isLent ? 'var(--emerald)' : 'var(--rose)'}">${fmtRem}</div>
           <div style="display:flex; gap:6px; justify-content:flex-end; margin-top:4px;">
             ${d.status !== 'settled' ? `<button class="btn btn-ghost" style="font-size:10px; padding:3px 8px;" onclick="window.openRepayDebtModal('${d.id}')">Repay</button>` : ''}
+            <button class="btn btn-ghost edit-btn" style="font-size:10px; padding:3px 8px;" data-action="edit-debt" data-id="${d.id}" onclick="window.editDebt('${d.id}')" title="Edit Debt">✏️ Edit</button>
             <button class="btn btn-ghost" style="font-size:10px; padding:3px 8px; color:var(--rose);" onclick="window.deleteDebt('${d.id}')">Delete</button>
           </div>
         </div>
