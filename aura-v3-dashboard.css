@@ -1,0 +1,66 @@
+/* ============================================================
+   AURA WEALTH OS — V3 DASHBOARD VISUAL PATCH
+   Load this AFTER styles.css:
+   <link rel="stylesheet" href="aura-v3-dashboard.css">
+   ============================================================ */
+
+/* ---------- 1. Net Worth trend badge + sparkline ---------- */
+.nw-trend-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+.nw-trend-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700;
+}
+.nw-trend-badge.up   { background:rgba(52,211,153,0.14); color:var(--emerald); }
+.nw-trend-badge.down { background:rgba(251,113,133,0.14); color:var(--rose); }
+.nw-trend-badge svg { width:12px; height:12px; }
+.nw-trend-usd { font-size:13px; color:var(--text-m); font-weight:600; }
+
+.nw-sparkline-wrap { width:100%; height:110px; margin-top:6px; }
+.nw-sparkline-wrap svg { width:100%; height:100%; overflow:visible; display:block; }
+.nw-spark-line { fill:none; stroke:url(#nwSparkGrad); stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+.nw-spark-fill { fill:url(#nwSparkFillGrad); opacity:0.9; }
+.nw-spark-dot { fill:var(--emerald); filter:drop-shadow(0 0 6px rgba(52,211,153,0.8)); }
+
+/* ---------- 2. Icon-badge breakdown row (replaces plain dots) ---------- */
+.bd-item.icon-style { flex-direction:row; align-items:center; gap:10px; }
+.bd-icon-badge {
+  width:34px; height:34px; border-radius:10px; flex-shrink:0;
+  display:grid; place-items:center; font-size:15px;
+}
+.bd-icon-badge svg { width:16px; height:16px; }
+
+/* ---------- 3. Circular progress ring for "Remaining Today" ---------- */
+.safe-spend-header.with-ring { align-items:center; }
+.remaining-ring-wrap { position:relative; width:96px; height:96px; flex-shrink:0; }
+.remaining-ring-wrap svg { width:100%; height:100%; transform:rotate(-90deg); }
+.remaining-ring-track { fill:none; stroke:var(--donut-track); stroke-width:9; }
+.remaining-ring-fill { fill:none; stroke:var(--emerald); stroke-width:9; stroke-linecap:round; transition:stroke-dasharray 1s var(--smooth), stroke 0.4s; }
+.remaining-ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+.remaining-ring-pct { font-size:20px; font-weight:800; font-variant-numeric:tabular-nums; }
+.remaining-ring-label { font-size:9px; color:var(--text-d); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; margin-top:2px; }
+
+/* ---------- 4. Account vault cards as icon-badge tiles (dashboard "Cash & Accounts") ---------- */
+.cash-account-tile { display:flex; align-items:center; gap:12px; padding:14px; border-radius:14px; background:var(--glass); box-shadow:var(--sh-s); transition:all .2s var(--smooth); }
+.cash-account-tile:hover { background:var(--glass-h); transform:translateY(-2px); }
+.cash-account-icon { width:38px; height:38px; border-radius:11px; display:grid; place-items:center; flex-shrink:0; font-weight:800; font-size:13px; color:#fff; }
+.cash-account-info { min-width:0; }
+.cash-account-name { font-size:11px; color:var(--text-m); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cash-account-val { font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; margin-top:1px; }
+.cash-accounts-strip { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; }
+
+/* ---------- 5. Two-column Cash Flow / Payday row ---------- */
+.dash-two-col-row { grid-column:1/-1; display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:20px; }
+.dash-two-col-row .card { margin-bottom:0; }
+/* Reused existing #miniChart bars sit fine at this width already —
+   just give them a touch more headroom in the narrower column. */
+.dash-two-col-row .progress-card .mini-chart { height:64px; }
+
+/* ---------- 7. Asset cards with ambient mini-sparkline ---------- */
+.asset-card { position:relative; overflow:hidden; }
+.asset-spark-bg { position:absolute; right:-6px; bottom:-4px; width:110px; height:60px; opacity:0.5; pointer-events:none; }
+
+@media (max-width:900px) {
+  .remaining-ring-wrap { width:76px; height:76px; }
+  .remaining-ring-pct { font-size:16px; }
+  .nw-sparkline-wrap { height:80px; }
+}

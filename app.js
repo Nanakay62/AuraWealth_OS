@@ -107,6 +107,7 @@ const defaultState = {
 };
 
 let state = JSON.parse(JSON.stringify(defaultState));
+window.state = state;
 let supabaseClient = null;
 
 // Helper Functions
@@ -3646,6 +3647,20 @@ function init() {
   try { injectIcons(); } catch (e) { console.warn('injectIcons error:', e); }
   try { updateGreeting(); } catch (e) { console.warn('updateGreeting error:', e); }
   try { loadFromStorage(); } catch (e) { console.warn('loadFromStorage error:', e); }
+  try {
+    recordDailySnapshot();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      hasOnboarded: state.hasOnboarded,
+      expenses: state.expenses,
+      incomes: state.incomes,
+      investments: state.investments,
+      transfers: state.transfers,
+      debts: state.debts,
+      history: state.history,
+      settings: state.settings,
+      pricesAsOf: state.pricesAsOf
+    }));
+  } catch (e) { console.warn('daily snapshot error:', e); }
   try { loadSettingsUI(); } catch (e) { console.warn('loadSettingsUI error:', e); }
   try { bindEvents(); console.log('[Aura] Event listeners bound via delegation.'); } catch (e) { console.warn('bindEvents error:', e); }
   try { renderAll(); } catch (e) { console.warn('renderAll error:', e); }
