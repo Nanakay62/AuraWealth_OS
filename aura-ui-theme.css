@@ -1,0 +1,92 @@
+/* ============================================================
+   DYCSON ECONOMICOS - UI THEME & GAUGE OVERFLOW FIXES
+   ============================================================ */
+
+/* Mobile Gauge & Circular Progress Ring Styling */
+.remaining-ring-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.remaining-ring-wrap svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+
+.remaining-ring-track {
+  fill: none;
+  stroke: var(--donut-track, rgba(255, 255, 255, 0.08));
+  stroke-width: 9;
+}
+
+.remaining-ring-fill {
+  fill: none;
+  stroke: var(--emerald, #10b981);
+  stroke-width: 9;
+  stroke-linecap: round;
+  transition: stroke-dasharray 1s var(--smooth, ease), stroke 0.4s;
+}
+
+.remaining-ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+}
+
+.remaining-ring-pct,
+.remaining-ring-percent {
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  white-space: nowrap;
+  color: var(--text, #ffffff);
+}
+
+.remaining-ring-label {
+  font-size: 8px;
+  color: var(--text-d, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: visible;
+  line-height: 1;
+}
+
+/* Prevent subtext clipping inside circular progress elements */
+.remaining-ring-wrap *,
+.circular-progress *,
+.ring-container * {
+  overflow: visible;
+}
+
+@media (max-width: 900px) {
+  .remaining-ring-wrap {
+    width: 76px;
+    height: 76px;
+  }
+  .remaining-ring-pct,
+  .remaining-ring-percent {
+    font-size: 13px;
+  }
+  .remaining-ring-label {
+    font-size: 8px;
+  }
+}

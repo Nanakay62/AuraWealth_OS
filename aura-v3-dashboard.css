@@ -1,5 +1,5 @@
 /* ============================================================
-   AURA WEALTH OS — V3 DASHBOARD VISUAL PATCH
+   DYCSON ECONOMICOS - V3 DASHBOARD VISUAL PATCH
    Load this AFTER styles.css:
    <link rel="stylesheet" href="aura-v3-dashboard.css">
    ============================================================ */
@@ -31,13 +31,13 @@
 
 /* ---------- 3. Circular progress ring for "Remaining Today" ---------- */
 .safe-spend-header.with-ring { align-items:center; }
-.remaining-ring-wrap { position:relative; width:96px; height:96px; flex-shrink:0; }
-.remaining-ring-wrap svg { width:100%; height:100%; transform:rotate(-90deg); }
+.remaining-ring-wrap { position:relative; width:76px; height:76px; flex-shrink:0; overflow:visible; display:flex; align-items:center; justify-content:center; }
+.remaining-ring-wrap svg { width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
 .remaining-ring-track { fill:none; stroke:var(--donut-track); stroke-width:9; }
 .remaining-ring-fill { fill:none; stroke:var(--emerald); stroke-width:9; stroke-linecap:round; transition:stroke-dasharray 1s var(--smooth), stroke 0.4s; }
-.remaining-ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
-.remaining-ring-pct { font-size:20px; font-weight:800; font-variant-numeric:tabular-nums; }
-.remaining-ring-label { font-size:9px; color:var(--text-d); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; margin-top:2px; }
+.remaining-ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; overflow:visible; width:100%; height:100%; }
+.remaining-ring-pct, .remaining-ring-percent { font-size:13px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1.1; white-space:nowrap; }
+.remaining-ring-label { font-size:8px; color:var(--text-d); text-transform:uppercase; letter-spacing:0.05em; font-weight:700; margin-top:2px; white-space:nowrap; overflow:visible; line-height:1; }
 
 /* ---------- 4. Account vault cards as icon-badge tiles (dashboard "Cash & Accounts") ---------- */
 .cash-account-tile { display:flex; align-items:center; gap:12px; padding:14px; border-radius:14px; background:var(--glass); box-shadow:var(--sh-s); transition:all .2s var(--smooth); }
@@ -51,7 +51,7 @@
 /* ---------- 5. Two-column Cash Flow / Payday row ---------- */
 .dash-two-col-row { grid-column:1/-1; display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:20px; }
 .dash-two-col-row .card { margin-bottom:0; }
-/* Reused existing #miniChart bars sit fine at this width already —
+/* Reused existing #miniChart bars sit fine at this width already -
    just give them a touch more headroom in the narrower column. */
 .dash-two-col-row .progress-card .mini-chart { height:64px; }
 
@@ -61,6 +61,7 @@
 
 @media (max-width:900px) {
   .remaining-ring-wrap { width:76px; height:76px; }
-  .remaining-ring-pct { font-size:16px; }
+  .remaining-ring-pct, .remaining-ring-percent { font-size:13px; }
+  .remaining-ring-label { font-size:8px; }
   .nw-sparkline-wrap { height:80px; }
 }

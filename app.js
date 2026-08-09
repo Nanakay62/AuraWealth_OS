@@ -2397,8 +2397,27 @@ function exportCsv() {
   toast('CSV report downloaded', 'success');
 }
 
+function getPdfExportContainer() {
+  let container = document.getElementById('pdf-export-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'pdf-export-container';
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '-9999px';
+    container.style.width = '800px';
+    container.style.background = '#ffffff';
+    container.style.color = '#0f172a';
+    container.style.zIndex = '-9999';
+    document.body.appendChild(container);
+  }
+  container.innerHTML = '';
+  return container;
+}
+
 // 1-Page Official Net Worth & Asset Proof Statement PDF Generator
 function exportPdf() {
+  const container = getPdfExportContainer();
   const element = document.createElement('div');
   element.style.padding = '36px 40px';
   element.style.background = '#ffffff';
@@ -2531,6 +2550,8 @@ function exportPdf() {
     </div>
   `;
 
+  container.appendChild(element);
+
   if (typeof html2pdf !== 'undefined') {
     const opt = {
       margin: 0.4,
@@ -2540,12 +2561,19 @@ function exportPdf() {
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save().then(() => {
+      container.innerHTML = '';
       toast('Proof of Funds PDF statement downloaded', 'success');
-    }).catch(() => window.print());
+    }).catch(() => {
+      container.innerHTML = '';
+      window.print();
+    });
   } else {
     window.print();
+    container.innerHTML = '';
   }
 }
+
+const exportPDFReport = exportPdf;
 
 function initStatementDatePickers() {
   const startEl = document.getElementById('statement-start-date');
@@ -2606,6 +2634,7 @@ function exportExpenditureStatement() {
   const holder = (state.user && state.user.email) ? state.user.email : 'Primary Account Holder';
   const periodStr = `${fmtDate(startDate)} - ${fmtDate(endDate)}`;
 
+  const container = getPdfExportContainer();
   const element = document.createElement('div');
   element.style.padding = '24px';
   element.style.fontFamily = "'IBM Plex Sans', -apple-system, sans-serif";
@@ -2676,6 +2705,8 @@ function exportExpenditureStatement() {
     </div>
   `;
 
+  container.appendChild(element);
+
   if (typeof html2pdf !== 'undefined') {
     const opt = {
       margin: 0.4,
@@ -2685,12 +2716,19 @@ function exportExpenditureStatement() {
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save().then(() => {
+      container.innerHTML = '';
       toast('Expenditure Statement PDF downloaded', 'success');
-    }).catch(() => window.print());
+    }).catch(() => {
+      container.innerHTML = '';
+      window.print();
+    });
   } else {
     window.print();
+    container.innerHTML = '';
   }
 }
+
+const exportStatementPDF = exportExpenditureStatement;
 
 // Fee Estimator Engine
 function calculateDefaultFee(amount) {
@@ -3855,6 +3893,9 @@ window.toggleTheme = toggleTheme;
 window.triggerPwaInstall = triggerPwaInstall;
 window.toggleAccordion = toggleAccordion;
 window.exportPdf = exportPdf;
+window.exportPDFReport = exportPdf;
+window.exportExpenditureStatement = exportExpenditureStatement;
+window.exportStatementPDF = exportExpenditureStatement;
 window.exportCsv = exportCsv;
 window.clearAllData = clearAllData;
 window.openTransferModal = openTransferModal;

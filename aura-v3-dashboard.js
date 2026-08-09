@@ -1,11 +1,11 @@
 /* ============================================================
-   AURA WEALTH OS — V3 DASHBOARD VISUAL PATCH (JS)
+   DYCSON ECONOMICOS - V3 DASHBOARD VISUAL PATCH (JS)
    Load this AFTER app.js and all your other patch scripts:
    <script src="aura-v3-dashboard.js"></script>
 
    REQUIRES ONE LINE ADDED TO app.js:
      window.state = state;
-   (add it right after "let state = JSON.parse(...)" near the top —
+   (add it right after "let state = JSON.parse(...)" near the top -
    without it the sparkline + weekly strip fall back gracefully,
    everything else still works.)
    ============================================================ */
@@ -20,7 +20,7 @@
 
   // Catmull-Rom -> cubic Bezier smoothing through the REAL data points.
   // With 2 points this correctly degrades to a straight line (a curve
-  // needs 3+ points to bend) — no synthetic points are ever inserted.
+  // needs 3+ points to bend) - no synthetic points are ever inserted.
   function smoothPath(pts) {
     if (pts.length < 3) {
       return pts.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join(' ');
@@ -78,7 +78,7 @@
     const isUp = delta >= 0;
     const fmtFn = window.fmtUsd || ((v) => `$${v.toFixed(2)}`);
 
-    // Label reflects how much real history we actually have —
+    // Label reflects how much real history we actually have -
     // never claims "vs last month" unless the data spans that long.
     const daysSpan = (new Date(sorted[sorted.length - 1].date) - new Date(sorted[0].date)) / 86400000;
     let periodLabel;
@@ -168,7 +168,7 @@
   // ---------- 3. Ensure a net-worth snapshot exists for *today*,
   // even if the user hasn't logged a transaction yet. Without this,
   // state.history only gains an entry when saveToStorage() runs (i.e.
-  // on a transaction), so quiet days silently have no data point —
+  // on a transaction), so quiet days silently have no data point -
   // that's why the trend/sparkline can look thinner than your actual
   // number of days using the app. This does not invent any values;
   // it just makes sure today's real current net worth gets recorded.
@@ -196,7 +196,7 @@
       window.renderAll = wrapped;
       renderV3Extras(); // run once immediately in case renderAll already fired
     } else {
-      // app.js not loaded yet — retry shortly
+      // app.js not loaded yet - retry shortly
       setTimeout(bootstrap, 150);
     }
   }
