@@ -1,7 +1,12 @@
 /* ============================================================
-   AURA WEALTH OS - REALTIME SYNC + SOFT DELETE ENGINE (v3, corrected)
+   AURA WEALTH OS - REALTIME SYNC + SOFT DELETE ENGINE (v3.1)
    Load AFTER app.js, supabase.js, aura-hardening-v2.js,
    aura-sync-fix.js, aura-sync-race-fix.js.
+
+   This file provides:
+   1. Soft-delete override for supaMirror (with retry queue)
+   2. Soft-delete-aware hydrateSupabase with cross-device race guard
+   3. Per-table Supabase Realtime subscriptions
    ============================================================ */
 
 (function () {
@@ -9,6 +14,9 @@
   // ------------------------------------------------------------
   // 1. Soft-delete override: every supaMirror('table','delete',row)
   //    call becomes an UPDATE that sets deleted_at, not a hard DELETE.
+  //
+  //    FIX (v3.1): On failure, enqueue the delete for offline retry
+  //    via enqueueSyncOp instead of silently dropping it.
   // ------------------------------------------------------------
   const _origSupaMirror = window.supaMirror;
   window.supaMirror = async function (table, op, row) {
@@ -21,8 +29,15 @@
         if (error) throw error;
         return;
       } catch (e) {
-        console.warn(`[Aura Realtime] Soft delete failed for ${table}:`, e);
-        toast(`Cloud sync issue (saved locally): ${e.message || 'unknown error'}`, 'error');
+        console.warn(`[Aura Realtime] Soft delete failed for ${table}/${row.id}:`, e);
+        // Enqueue for offline retry so the delete is not permanently lost
+        if (typeof window.enqueueSyncOp === 'function') {
+          window.enqueueSyncOp(table, 'delete', row);
+          console.log(`[Aura Realtime] Enqueued soft-delete retry for ${table}/${row.id}`);
+        }
+        if (typeof toast === 'function') {
+          toast(`Cloud sync issue (delete queued for retry): ${e.message || 'unknown error'}`, 'error');
+        }
       }
       return;
     }
@@ -33,10 +48,23 @@
   // 2. Corrected hydrateSupabase: fetches ALL rows (including
   //    soft-deleted ones), splits active vs deleted client-side,
   //    and explicitly purges deleted ids from local state before
-  //    merging. This is what makes a cold device (never opened
-  //    this app while the delete happened) end up correct.
+  //    merging.
+  //
+  //    FIX (v3.1): Merges the cross-device settings race guard
+  //    from aura-sync-race-fix.js that v3.0 was accidentally
+  //    destroying by blindly reassigning window.hydrateSupabase.
+  //    Now waits for pending profile pushes and checks updated_at
+  //    before overwriting local settings with cloud data.
+  //
+  //    Also adds auto-retry sync for transfers and debts (was
+  //    missing in v3.0).
   // ------------------------------------------------------------
-  window.hydrateSupabase = async function hydrateSupabaseV2() {
+  window.hydrateSupabase = async function hydrateSupabaseV3() {
+    // Cross-device race guard: wait for any in-flight profile push
+    // before we read from the cloud, so we don't read stale data.
+    const raceState = window._auraSyncRace || {};
+    try { await (raceState.pendingProfilePush || Promise.resolve()); } catch (e) { /* already logged */ }
+
     if (!supabaseClient || !state.authUser) return;
     try {
       const [expensesRes, investmentsRes, incomesRes, transfersRes, debtsRes, profileRes] = await Promise.all([
@@ -92,29 +120,52 @@
       const cloudInvIds = new Set(inv.active.map(v => v.id));
       (state.investments || []).filter(v => v.id && !cloudInvIds.has(v.id) && !inv.deletedIds.has(v.id)).forEach(v => supaMirror('investments', 'insert', v));
 
+      // FIX (v3.1): Also auto-retry for transfers and debts (was missing)
+      const cloudTrfIds = new Set(trf.active.map(t => t.id));
+      (state.transfers || []).filter(t => t.id && !cloudTrfIds.has(t.id) && !trf.deletedIds.has(t.id)).forEach(t => supaMirror('transfers', 'insert', t));
+
+      const cloudDbtIds = new Set(dbt.active.map(d => d.id));
+      (state.debts || []).filter(d => d.id && !cloudDbtIds.has(d.id) && !dbt.deletedIds.has(d.id)).forEach(d => supaMirror('debts', 'insert', d));
+
+      // Profile hydration with cross-device race guard
       if (profileRes && profileRes.data) {
         const p = profileRes.data;
-        state.settings.username = p.username || state.settings.username || '';
-        state.hasOnboarded = p.has_onboarded !== undefined ? p.has_onboarded : true;
-        state.settings.monthlySalary = parseFloat(p.monthly_salary) || 0;
-        state.settings.spendingLimit = parseFloat(p.spending_limit) || 0;
-        state.settings.paydayDay = parseInt(p.payday_day) || 25;
-        state.settings.bankCash = parseFloat(p.bank_cash) || 0;
-        state.settings.cashBalance = parseFloat(p.bank_cash) || 0;
-        state.settings.mtnMomoCash = p.mtn_momo_cash !== undefined ? (parseFloat(p.mtn_momo_cash) || 0) : (parseFloat(p.momo_cash) || 0);
-        state.settings.telecelCash = parseFloat(p.telecel_cash) || 0;
-        state.settings.atMoneyCash = parseFloat(p.at_money_cash) || 0;
-        state.settings.homeCash = parseFloat(p.home_cash) || 0;
-        state.settings.usdHomeCash = parseFloat(p.usd_home_cash) || 0;
-        state.settings.usdRate = parseFloat(p.usd_rate) || 0.065;
-        state.settings.payAllocation = {
-          tbills: parseFloat(p.pay_allocation_tbills) || 500,
-          savings: parseFloat(p.pay_allocation_savings) || 300,
-          momo: parseFloat(p.pay_allocation_momo) || 1100
-        };
-        state.settings.lastPayAllocationCycle = p.last_pay_allocation_cycle || null;
+        const cloudUpdatedAt = p.updated_at ? new Date(p.updated_at).getTime() : 0;
+        const lastLocalEdit = raceState.lastLocalSettingsEditAt || 0;
+        const lastSynced = raceState.lastSyncedAt || 0;
+
+        // Only accept the cloud profile if it's newer than the last
+        // local edit, or that local edit has already been confirmed pushed.
+        if (cloudUpdatedAt >= lastLocalEdit || lastLocalEdit <= lastSynced) {
+          state.settings.username = p.username || state.settings.username || '';
+          state.hasOnboarded = p.has_onboarded !== undefined ? p.has_onboarded : true;
+          state.settings.monthlySalary = parseFloat(p.monthly_salary) || 0;
+          state.settings.spendingLimit = parseFloat(p.spending_limit) || 0;
+          state.settings.paydayDay = parseInt(p.payday_day) || 25;
+          state.settings.bankCash = parseFloat(p.bank_cash) || 0;
+          state.settings.cashBalance = parseFloat(p.bank_cash) || 0;
+          state.settings.mtnMomoCash = p.mtn_momo_cash !== undefined ? (parseFloat(p.mtn_momo_cash) || 0) : (parseFloat(p.momo_cash) || 0);
+          state.settings.telecelCash = parseFloat(p.telecel_cash) || 0;
+          state.settings.atMoneyCash = parseFloat(p.at_money_cash) || 0;
+          state.settings.homeCash = parseFloat(p.home_cash) || 0;
+          state.settings.usdHomeCash = parseFloat(p.usd_home_cash) || 0;
+          state.settings.usdRate = parseFloat(p.usd_rate) || 0.065;
+          state.settings.payAllocation = {
+            tbills: parseFloat(p.pay_allocation_tbills) || 500,
+            savings: parseFloat(p.pay_allocation_savings) || 300,
+            momo: parseFloat(p.pay_allocation_momo) || 1100
+          };
+          state.settings.lastPayAllocationCycle = p.last_pay_allocation_cycle || null;
+        } else {
+          console.warn('[Aura Sync Fix] Skipped profile hydrate: local edit is newer than the cloud row. Re-pushing local settings.');
+          if (typeof window.syncProfileToSupabase === 'function') {
+            window.syncProfileToSupabase();
+          }
+        }
       } else {
-        syncProfileToSupabase();
+        if (typeof syncProfileToSupabase === 'function') {
+          syncProfileToSupabase();
+        }
       }
 
       saveToStorage();
@@ -128,8 +179,7 @@
 
   // ------------------------------------------------------------
   // 3. Realtime: one postgres_changes listener PER table on a
-  //    single channel. The original single filter-only call is
-  //    invalid - postgres_changes requires a table per listener.
+  //    single channel.
   // ------------------------------------------------------------
   const REALTIME_TABLES = ['expenses', 'incomes', 'investments', 'transfers', 'debts'];
 
@@ -189,5 +239,5 @@
     return result;
   };
 
-  console.log('[Aura Realtime v3] Soft deletes + per-table realtime + purge-on-hydrate + username support active.');
+  console.log('[Aura Realtime v3.1] Soft deletes with retry queue + cross-device race guard + per-table realtime + purge-on-hydrate active.');
 })();
