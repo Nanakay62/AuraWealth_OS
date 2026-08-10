@@ -7,7 +7,7 @@
 // forces every installed browser to drop its stale cache and
 // re-fetch fresh files. Forgetting to bump it is exactly what
 // caused the "white text in light mode" bug.
-const CACHE_NAME = 'aura-wealth-v5';
+const CACHE_NAME = 'aura-wealth-v6';
 
 // Files that change frequently - always try network first so users
 // get updates immediately, falling back to cache only if offline.
@@ -15,7 +15,15 @@ const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
-  './app.js'
+  './app.js',
+  './supabase.js',
+  './aura-hardening-v2.js',
+  './aura-sync-fix.js',
+  './aura-sync-race-fix.js',
+  './aura-realtime-v3.js',
+  './aura-v3-dashboard.js',
+  './aura-ui-theme.css',
+  './aura-v3-dashboard.css'
 ];
 
 // Files that rarely/never change - safe to serve cache-first.
